@@ -1,8 +1,13 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:softec25/screens/auth/forgot_password.dart';
+import 'package:softec25/screens/auth/register.dart';
 import 'package:softec25/styles.dart';
+import 'package:softec25/widgets/buttons.dart';
+import 'package:softec25/widgets/textfield.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -18,9 +23,10 @@ class _LoginState extends State<Login> {
   void initState() {
     super.initState();
     FlutterNativeSplash.remove();
-    // Future.delayed(const Duration(seconds: 5), () {
-    // });
   }
+
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +52,9 @@ class _LoginState extends State<Login> {
                   SizedBox(width: 8.w),
                   Text(
                     'Aadat',
-                    style: bold.copyWith(fontSize: 24.sp),
+                    style: interBold.copyWith(
+                      fontSize: 24.sp,
+                    ),
                   ),
                 ],
               ),
@@ -70,6 +78,90 @@ class _LoginState extends State<Login> {
                 ],
               ),
               SizedBox(height: 10.h),
+              CustomTextField(
+                hintText: 'name@example.com',
+                controller: emailController,
+                keyboardType: TextInputType.emailAddress,
+                hasNextTextField: true,
+              ),
+              SizedBox(height: 20.h),
+              Row(
+                children: [
+                  Text(
+                    'Password',
+                    style: semiBold.copyWith(
+                      fontSize: 13.sp,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10.h),
+              CustomTextField(
+                hintText: 'your password',
+                controller: passwordController,
+                obscureText: true,
+              ),
+              SizedBox(height: 13.h),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  CupertinoButton(
+                    onPressed: () {
+                      Navigator.of(
+                        context,
+                      ).pushNamed(ForgotPassword.routeName);
+                    },
+                    child: Text(
+                      'Forgot password?',
+                      style: semiBold.copyWith(
+                        fontSize: 13.sp,
+                        color: AppColors.secondaryColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 37.h),
+              PrimaryButton(
+                text: 'Continue with Email',
+                onPressed: () {},
+              ),
+              SizedBox(height: 20.h),
+              SecondaryButton(
+                text: 'Continue with Google',
+                svgIcon: 'assets/svg/google.svg',
+                onPressed: () {},
+              ),
+              SizedBox(height: 68.h),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Don’t have an account?',
+                    style: semiBold.copyWith(
+                      fontSize: 13.sp,
+                      color: AppColors.greyTextColor,
+                    ),
+                  ),
+                  SizedBox(width: 5),
+                  CupertinoButton(
+                    onPressed: () {
+                      Navigator.of(
+                        context,
+                      ).pushNamed(Register.routeName);
+                    },
+                    padding: EdgeInsets.zero,
+                    minSize: 0,
+
+                    child: Text(
+                      'Register',
+                      style: semiBold.copyWith(
+                        fontSize: 13.sp,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),

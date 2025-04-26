@@ -4,7 +4,9 @@ import 'package:softec25/styles.dart';
 import 'package:softec25/widgets/ars_progress_dialog.dart';
 
 // For pretty printing
-var _logger = Logger(printer: PrettyPrinter(colors: true, printEmojis: true));
+var _logger = Logger(
+  printer: PrettyPrinter(colors: true, printEmojis: true),
+);
 console(msg) {
   _logger.d(msg);
 }
@@ -54,13 +56,45 @@ Size getTextSize(String text, TextStyle style) {
   return textPainter.size;
 }
 
-Size getFixedTextSize(String text, TextStyle style, double width) {
+Size getFixedTextSize(
+  String text,
+  TextStyle style,
+  double width,
+) {
   final TextPainter textPainter = TextPainter(
     text: TextSpan(text: text, style: style),
     // maxLines: 1,
     textDirection: TextDirection.ltr,
   )..layout(minWidth: 0, maxWidth: width);
   return textPainter.size;
+}
+
+MaterialColor createMaterialColor(Color color) {
+  List<double> strengths = <double>[
+    .05,
+    .1,
+    .2,
+    .3,
+    .4,
+    .5,
+    .6,
+    .7,
+    .8,
+    .9,
+  ];
+  Map<int, Color> swatch = {};
+  final int r = color.red, g = color.green, b = color.blue;
+
+  for (var strength in strengths) {
+    final double ds = 0.5 - strength;
+    swatch[(strength * 1000).round()] = Color.fromRGBO(
+      r + ((ds < 0 ? r : (255 - r)) * ds).round(),
+      g + ((ds < 0 ? g : (255 - g)) * ds).round(),
+      b + ((ds < 0 ? b : (255 - b)) * ds).round(),
+      1,
+    );
+  }
+  return MaterialColor(color.value, swatch);
 }
 
 ArsProgressDialog? _progressDialog;
@@ -82,7 +116,9 @@ void showLoadingIndicator(BuildContext context) {
       ),
       child: const CircularProgressIndicator(
         strokeWidth: 2,
-        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryColor),
+        valueColor: AlwaysStoppedAnimation<Color>(
+          AppColors.primaryColor,
+        ),
       ),
     ),
   );

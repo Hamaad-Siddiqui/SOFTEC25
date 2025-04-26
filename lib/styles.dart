@@ -6,8 +6,11 @@ class AppColors {
   static const secondaryColor = Color(0xFF09090b);
   static const scaffoldLightBgColor = Color(0xFFFFFFFF);
 
-  static const lightTextColor = Color(0xFF8B8B8B);
+  static const textFieldFillColor = Color(0xFFF7F7F8);
+
+  static const lightTextColor = Color(0xFFFFFFFF);
   static const greyTextColor = Color(0xFF707281);
+  static const hintTextColor = Color(0xFFA0A1AB);
   static const darkTextColor = Color(0xFF000000);
 }
 
