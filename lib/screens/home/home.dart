@@ -24,8 +24,10 @@ class _HomeScreenState extends State<HomeScreen>
   late AnimationController _animationController;
   late Animation<double> _animation;
 
-  // Create dummy tasks
-  late List<TaskModel> tasks;
+  // Create dummy tasks for different days
+  late List<TaskModel> allTasks;
+  // Filtered tasks for the selected date
+  late List<TaskModel> filteredTasks;
 
   @override
   void initState() {
@@ -48,20 +50,36 @@ class _HomeScreenState extends State<HomeScreen>
     // Generate week dates (3 days before today + today + 3 days after)
     _generateWeekDates();
 
-    // Initialize dummy tasks with SubTaskModel objects
-    tasks = [
+    // Initialize dummy tasks with SubTaskModel objects for different days
+    _initializeDummyTasks();
+
+    // Filter tasks for the selected date (initially today)
+    _filterTasksByDate();
+  }
+
+  // Initialize tasks for different days
+  void _initializeDummyTasks() {
+    final now = DateTime.now();
+
+    allTasks = [
+      // Today's tasks
       TaskModel(
         id: '1',
         title: 'Email back Mrs James',
         description:
             'For the new intern we have next week from Alex Carter, a marketing student from Brookfield University. Confirm their arrival time and make sure the orientation package is prepared. Also, check if they need any accommodation assistance during their stay.',
-        dueDate: DateTime.now().add(
-          const Duration(hours: 2),
+        dueDate: DateTime(
+          now.year,
+          now.month,
+          now.day,
+          now.hour + 2,
         ),
         category: 'Academics',
-        createdAt: DateTime.now().subtract(
-          const Duration(days: 1),
-        ),
+        createdAt: DateTime(
+          now.year,
+          now.month,
+          now.day,
+        ).subtract(const Duration(days: 1)),
         subtasks: [
           SubTaskModel(task: 'Review email contents'),
           SubTaskModel(task: 'Check attachments'),
@@ -69,33 +87,229 @@ class _HomeScreenState extends State<HomeScreen>
       ),
       TaskModel(
         id: '2',
-        title: 'Email back Mrs James',
+        title: 'Check project report',
         description:
-            'For the new intern we have next week from Alex Carter, a marketing student from Brookfield University. Confirm their arrival time and ensure all documents are properly prepared.',
-        dueDate: DateTime.now().add(
-          const Duration(hours: 4),
+            'Review the quarterly report before sending it to the department. Make sure all figures are accurate and up to date.',
+        dueDate: DateTime(
+          now.year,
+          now.month,
+          now.day,
+          now.hour + 4,
         ),
-        category: 'Academics',
-        createdAt: DateTime.now().subtract(
-          const Duration(days: 1),
-        ),
+        category: 'Work',
+        createdAt: DateTime(
+          now.year,
+          now.month,
+          now.day,
+        ).subtract(const Duration(days: 1)),
       ),
       TaskModel(
         id: '3',
-        title: 'Email back Mrs James',
+        title: 'Schedule team meeting',
         description:
-            'For the new intern we have next week from Alex Carter, a marketing student from Brookfield University. Confirm their arrival and coordinate with department heads for introductions.',
-        dueDate: DateTime.now().add(
-          const Duration(hours: 6),
+            'Set up the weekly progress meeting with the development team. Prepare agenda and send calendar invites to all team members.',
+        dueDate: DateTime(
+          now.year,
+          now.month,
+          now.day,
+          now.hour + 6,
         ),
         category: 'Academics',
-        createdAt: DateTime.now().subtract(
-          const Duration(days: 1),
+        createdAt: DateTime(
+          now.year,
+          now.month,
+          now.day,
+        ).subtract(const Duration(days: 1)),
+        subtasks: [
+          SubTaskModel(task: 'Create meeting agenda'),
+          SubTaskModel(task: 'Book conference room'),
+          SubTaskModel(task: 'Send calendar invites'),
+        ],
+      ),
+
+      // Tomorrow's tasks
+      TaskModel(
+        id: '4',
+        title: 'Doctor Appointment',
+        description:
+            'Annual checkup at Dr. Smith\'s clinic. Bring health insurance card and list of current medications.',
+        dueDate: DateTime(
+          now.year,
+          now.month,
+          now.day + 1,
+          10,
+          30,
+        ),
+        category: 'Personal',
+        createdAt: DateTime(
+          now.year,
+          now.month,
+          now.day - 2,
         ),
         subtasks: [
-          SubTaskModel(task: 'Check intern details'),
-          SubTaskModel(task: 'Verify documentation'),
-          SubTaskModel(task: 'Schedule orientation'),
+          SubTaskModel(task: 'Prepare medication list'),
+          SubTaskModel(
+            task: 'Collect previous medical reports',
+          ),
+        ],
+      ),
+      TaskModel(
+        id: '5',
+        title: 'Project Presentation',
+        description:
+            'Present the new feature implementation to the stakeholders. Include performance metrics and user feedback.',
+        dueDate: DateTime(
+          now.year,
+          now.month,
+          now.day + 1,
+          14,
+          0,
+        ),
+        category: 'Work',
+        createdAt: DateTime(
+          now.year,
+          now.month,
+          now.day - 1,
+        ),
+        subtasks: [
+          SubTaskModel(task: 'Finalize slides'),
+          SubTaskModel(task: 'Practice presentation'),
+          SubTaskModel(task: 'Prepare for Q&A'),
+        ],
+      ),
+
+      // Yesterday's tasks
+      TaskModel(
+        id: '6',
+        title: 'Gym Workout',
+        description:
+            'Cardio and strength training session at Fitness First. Focus on upper body and core exercises.',
+        dueDate: DateTime(
+          now.year,
+          now.month,
+          now.day - 1,
+          18,
+          0,
+        ),
+        category: 'Health',
+        createdAt: DateTime(
+          now.year,
+          now.month,
+          now.day - 2,
+        ),
+        isCompleted: true,
+      ),
+      TaskModel(
+        id: '7',
+        title: 'Grocery Shopping',
+        description:
+            'Pick up essentials from Whole Foods. Don\'t forget milk, eggs, bread, and fresh vegetables.',
+        dueDate: DateTime(
+          now.year,
+          now.month,
+          now.day - 1,
+          20,
+          0,
+        ),
+        category: 'Personal',
+        createdAt: DateTime(
+          now.year,
+          now.month,
+          now.day - 2,
+        ),
+        isCompleted: true,
+        subtasks: [
+          SubTaskModel(
+            task: 'Check pantry inventory',
+            isCompleted: true,
+          ),
+          SubTaskModel(
+            task: 'Make shopping list',
+            isCompleted: true,
+          ),
+          SubTaskModel(
+            task: 'Check for discounts',
+            isCompleted: true,
+          ),
+        ],
+      ),
+
+      // Two days ago
+      TaskModel(
+        id: '8',
+        title: 'Code Review',
+        description:
+            'Review pull request #342 from the development team. Focus on performance optimizations and code quality.',
+        dueDate: DateTime(
+          now.year,
+          now.month,
+          now.day - 2,
+          15,
+          0,
+        ),
+        category: 'Work',
+        createdAt: DateTime(
+          now.year,
+          now.month,
+          now.day - 3,
+        ),
+        isCompleted: true,
+      ),
+
+      // Day after tomorrow
+      TaskModel(
+        id: '9',
+        title: 'Team Lunch',
+        description:
+            'Monthly team bonding lunch at Italian Bistro. Reservation made for 12:30 PM, confirm attendance with all team members.',
+        dueDate: DateTime(
+          now.year,
+          now.month,
+          now.day + 2,
+          12,
+          30,
+        ),
+        category: 'Social',
+        createdAt: DateTime(now.year, now.month, now.day),
+        subtasks: [
+          SubTaskModel(task: 'Confirm reservation'),
+          SubTaskModel(task: 'Send reminder to team'),
+        ],
+      ),
+      TaskModel(
+        id: '10',
+        title: 'Contract Review',
+        description:
+            'Review and sign the new client contract. Check payment terms and delivery timeline before signing.',
+        dueDate: DateTime(
+          now.year,
+          now.month,
+          now.day + 2,
+          16,
+          0,
+        ),
+        category: 'Work',
+        createdAt: DateTime(now.year, now.month, now.day),
+      ),
+
+      // Three days from now
+      TaskModel(
+        id: '11',
+        title: 'Website Update',
+        description:
+            'Deploy the new homepage design and test all functionalities. Make sure all links are working and analytics is properly set up.',
+        dueDate: DateTime(
+          now.year,
+          now.month,
+          now.day + 3,
+          11,
+        ),
+        category: 'Work',
+        createdAt: DateTime(now.year, now.month, now.day),
+        subtasks: [
+          SubTaskModel(task: 'Final design review'),
+          SubTaskModel(task: 'Cross-browser testing'),
+          SubTaskModel(task: 'Mobile responsiveness check'),
         ],
       ),
     ];
@@ -111,6 +325,30 @@ class _HomeScreenState extends State<HomeScreen>
         now.day - 3 + index,
       ),
     );
+  }
+
+  // Filter tasks based on the selected date and sort by completion status
+  void _filterTasksByDate() {
+    // Get all tasks for the selected date
+    List<TaskModel> tasksForDate =
+        allTasks.where((task) {
+          return task.dueDate.year == _selectedDate.year &&
+              task.dueDate.month == _selectedDate.month &&
+              task.dueDate.day == _selectedDate.day;
+        }).toList();
+
+    // Sort tasks - incomplete tasks first, then completed tasks
+    tasksForDate.sort((a, b) {
+      if (a.isCompleted == b.isCompleted) {
+        // If completion status is the same, sort by due date (earlier first)
+        return a.dueDate.compareTo(b.dueDate);
+      }
+      // Otherwise, incomplete tasks first
+      return a.isCompleted ? 1 : -1;
+    });
+
+    // Store all tasks but only count uncompleted ones for the counter
+    filteredTasks = tasksForDate;
   }
 
   // Check if a date is today
@@ -136,10 +374,69 @@ class _HomeScreenState extends State<HomeScreen>
       _selectedDate = date;
       _animationController.reset();
       _animationController.forward();
-    });
 
-    // Here you would typically filter tasks based on the selected date
-    // For this demo, we'll just keep the same tasks
+      // Filter tasks based on the newly selected date
+      _filterTasksByDate();
+    });
+  }
+
+  // Get color for date card based on date status
+  Color _getDateColor(DateTime date, bool isSelected) {
+    // Return secondary color for selected date
+    if (isSelected) {
+      return AppColors.secondaryColor;
+    }
+
+    // For today, use the existing light blue
+    if (_isToday(date)) {
+      return Color(0xFFE0EBFE).withOpacity(0.5);
+    }
+
+    // For past dates
+    if (date.isBefore(
+      DateTime(now.year, now.month, now.day),
+    )) {
+      // Get tasks for this date
+      List<TaskModel> dateTasksCheck =
+          allTasks.where((task) {
+            return task.dueDate.year == date.year &&
+                task.dueDate.month == date.month &&
+                task.dueDate.day == date.day;
+          }).toList();
+
+      // No tasks for this date, use light gray
+      if (dateTasksCheck.isEmpty) {
+        return Color(0xFFE8E8E8).withOpacity(
+          0.5,
+        ); // Light gray for past dates with no tasks
+      }
+
+      // Check if all tasks were completed
+      bool allCompleted = dateTasksCheck.every(
+        (task) => task.isCompleted,
+      );
+      // Check if all tasks were incomplete
+      bool noneCompleted = dateTasksCheck.every(
+        (task) => !task.isCompleted,
+      );
+
+      if (allCompleted) {
+        return Color(0xFFD1F5D3).withOpacity(
+          0.5,
+        ); // Light green for completed tasks
+      } else if (noneCompleted) {
+        return Color(0xFFF5D1D1).withOpacity(
+          0.5,
+        ); // Light red for incomplete tasks
+      } else {
+        return Color(0xFFF5EFD1).withOpacity(
+          0.5,
+        ); // Light yellow for mixed completion
+      }
+    }
+
+    // For future dates, return transparent (will be handled by the border)
+    return Colors.transparent;
   }
 
   @override
@@ -280,18 +577,10 @@ class _HomeScreenState extends State<HomeScreen>
                                       vertical: 10.h,
                                     ),
                                 decoration: BoxDecoration(
-                                  color:
-                                      isSelected
-                                          ? AppColors
-                                              .secondaryColor
-                                          : (isToday
-                                              ? Color(
-                                                0xFFE0EBFE,
-                                              ).withOpacity(
-                                                0.5,
-                                              )
-                                              : Colors
-                                                  .transparent),
+                                  color: _getDateColor(
+                                    date,
+                                    isSelected,
+                                  ),
                                   borderRadius:
                                       BorderRadius.circular(
                                         12.r,
@@ -413,7 +702,7 @@ class _HomeScreenState extends State<HomeScreen>
                       ),
                       SizedBox(height: 17.h),
                       Text(
-                        'You have ${tasks.length}\ntasks left for today',
+                        'You ${_selectedDate.isBefore(DateTime(now.year, now.month, now.day)) ? 'had' : 'have'} ${filteredTasks.where((task) => !task.isCompleted).length}\ntasks left ${_isToday(_selectedDate) ? 'for today' : 'for ${DateFormat('EEEE').format(_selectedDate)}'}',
                         style: semiBold.copyWith(
                           fontSize: 18.sp,
                           color: AppColors.secondaryColor
@@ -424,17 +713,19 @@ class _HomeScreenState extends State<HomeScreen>
                       SizedBox(height: 17.h),
 
                       // Tasks List
-                      ...tasks
+                      ...filteredTasks
                           .map(
                             (task) => TaskCard(
                               task: task,
-                              isLast: task == tasks.last,
+                              isLast:
+                                  task ==
+                                  filteredTasks.last,
                               onTaskStatusChanged: (
                                 isCompleted,
                                 updatedSubtasks,
                               ) {
                                 setState(() {
-                                  final index = tasks
+                                  final index = allTasks
                                       .indexWhere(
                                         (t) =>
                                             t.id == task.id,
@@ -447,9 +738,10 @@ class _HomeScreenState extends State<HomeScreen>
                                           subtasks:
                                               updatedSubtasks,
                                         );
-                                    tasks[index] =
+                                    allTasks[index] =
                                         updatedTask;
                                   }
+                                  _filterTasksByDate();
                                 });
                               },
                             ),
@@ -523,6 +815,7 @@ class _TaskCardState extends State<TaskCard>
     }
   }
 
+  // Handle task completion without animation or expansion
   void _handleTaskCompletion(bool isCompleted) {
     // If task is marked complete, automatically mark all subtasks as complete
     if (isCompleted) {
@@ -535,6 +828,14 @@ class _TaskCardState extends State<TaskCard>
                 ),
               )
               .toList();
+
+      // Update without animation and collapse if expanded
+      if (_expanded) {
+        setState(() {
+          _expanded = false;
+          _animationController.reverse();
+        });
+      }
 
       widget.onTaskStatusChanged(true, updatedSubtasks);
       setState(() {
