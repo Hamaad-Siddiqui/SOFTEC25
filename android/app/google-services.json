@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1074530652876",
+    "project_id": "personal-ai-life-assistant",
+    "storage_bucket": "personal-ai-life-assistant.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1074530652876:android:b3c3ce4c114c8cf931e869",
+        "android_client_info": {
+          "package_name": "com.softec25.ai"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDqNRWjwaJ7UjSOOjF8unYCdwxIeahATzA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
