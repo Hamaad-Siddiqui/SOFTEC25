@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:softec25/bloc/main_bloc.dart';
 import 'package:softec25/styles.dart';
-import 'package:softec25/utils/utils.dart';
+import 'package:softec25/widgets/buttons.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
@@ -18,12 +16,12 @@ class SettingScreen extends StatefulWidget {
 }
 
 class _SettingScreenState extends State<SettingScreen> {
+  Map data = {};
+  final TextEditingController _controller =
+      TextEditingController();
+
   @override
   Widget build(BuildContext context) {
-    final bloc = Provider.of<MainBloc>(
-      context,
-      listen: false,
-    );
     return Scaffold(
       backgroundColor: AppColors.scaffoldLightBgColor,
       body: SizedBox(
@@ -35,7 +33,33 @@ class _SettingScreenState extends State<SettingScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(
-                height: ScreenUtil().statusBarHeight + 40.h,
+                height:
+                    ScreenUtil().statusBarHeight + 100.h,
+              ),
+              TextField(
+                controller: _controller,
+                decoration: InputDecoration(
+                  labelText: 'Task Name',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 20.h),
+              PrimaryButton(
+                text: 'Create Task',
+                onPressed: () async {
+                  data = await Provider.of<MainBloc>(
+                    context,
+                    listen: false,
+                  ).taskCreation(_controller.text);
+                  setState(() {
+                    data = data;
+                  });
+                },
+              ),
+
+              Padding(
+                padding: const EdgeInsets.only(top: 20),
+                child: Text(data.toString()),
               ),
             ],
           ),

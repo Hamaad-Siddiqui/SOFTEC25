@@ -15,6 +15,7 @@ class MainBloc extends ChangeNotifier {
 
   final auth = FirebaseAuth.instance;
   final db = FirebaseFirestore.instance;
+  List createdCategories = ["Academics"];
 
   bool get isLoggedIn => auth.currentUser != null;
 
@@ -221,20 +222,59 @@ class MainBloc extends ChangeNotifier {
     }
   }
 
-  
-  Future generateTests() async {
+  Future<Map<String, dynamic>> checklistCreation(
+    String checklist,
+  ) async {
     final String prompt = '''
+Please make sure that you return JSON because whatever you give back goes directly to my codebase. So you will be given an input from the user that will be the task they want to create. Let's say that they give you the task: "Apply for internships" so you will return the response like:
 
+{
+  "title": "Apply for internship",
+  "time" : "", 
+  "timestamp": "1714123456123",
+  "timeString": "",
+  "category": "Career",
+  "description": "",
+  "completed": false,
+  "timed": false,
+  "subtasks": 
+	[
+		{
+			title: "Update and tailor resume and cover letter",
+			completed: false,
+		},
+		{
+			title: "Research and shortlist companies",
+			completed: false,
+		},
+		{
+			title: "Submit applications with required documents",
+			completed: false,
+		},
+		{
+			title: "Track applications and follow up if needed",
+			completed: false,
+		},
+	], 
+}
+
+The timestamp is the milliseconds from flutter firestore like this. Timestamp timestamp = Timestamp.now(); int millis = timestamp.millisecondsSinceEpoch; In this example the task is assumed for today because now deadline was given in he prompt by the user. If a future date is given then give the timestamp for that. If a task is big it can be broken down and you can generate its description too and a title. I will also give a set of categories if the task fits one of those categories then pick one from there. If not then generate a category for the task and return it. A task can have a single category. You have to break the task into subtasks as well. By default they wont be completed. If they said something like apply for internships tonight you would've assumed today at 8pm. if 8pm hasn't already happened. so pls use common sense there. something like: time: "20:00", timeString: "8 PM", timed: true, and the timestamp for 8pm today. You dont have to essentially give 4 subtasks. just give as many as you think are needed. if the user says something like I want to do X on 21st which is an example date then dont set timed to true, But add the timestamp for the start of that day, also empty time and timeString. 
+
+
+Here are the existing categories: $createdCategories
+
+Here is the prompt by the user $checklist.
 ''';
 
-    final systemMessage = OpenAIChatCompletionChoiceMessageModel(
-      content: [
-        OpenAIChatCompletionChoiceMessageContentItemModel.text(
-          "You are a test generator.",
-        ),
-      ],
-      role: OpenAIChatMessageRole.system,
-    );
+    final systemMessage =
+        OpenAIChatCompletionChoiceMessageModel(
+          content: [
+            OpenAIChatCompletionChoiceMessageContentItemModel.text(
+              "You are a test generator.",
+            ),
+          ],
+          role: OpenAIChatMessageRole.system,
+        );
 
     final userMessage = OpenAIChatCompletionChoiceMessageModel(
       content: [
@@ -245,18 +285,81 @@ class MainBloc extends ChangeNotifier {
       role: OpenAIChatMessageRole.user,
     );
 
-    final requestMessages = [
-      systemMessage,
-      userMessage,
-    ];
+    final requestMessages = [systemMessage, userMessage];
 
-    OpenAIChatCompletionModel chatCompletion =
-        await OpenAI.instance.chat.create(
-      model: "gpt-4o-mini",
-      responseFormat: {"type": "json_object"},
-      messages: requestMessages,
-    );
-  Map<String, dynamic> response = jsonDecode(chatCompletion.choices[0].message.content![0].text!);
+    OpenAIChatCompletionModel chatCompletion = await OpenAI
+        .instance
+        .chat
+        .create(
+          model: "gpt-4o-mini",
+          responseFormat: {"type": "json_object"},
+          messages: requestMessages,
+        );
     notifyListeners();
+    return jsonDecode(
+      chatCompletion.choices[0].message.content![0].text!,
+    );
+  }
+
+  Future<Map<String, dynamic>> taskCreation(
+    String task,
+  ) async {
+    final String prompt = '''
+Please make sure that you return JSON because whatever you give back goes directly to my codebase. So you will be given an input from the user that will be the task they want to create. Let's say that they give you the task: "Apply for internships" so you will return the response like:
+
+{
+  "title": "Apply for internship",
+  "time" : "", 
+  "timestamp": "1714123456123",
+  "timeString": "",
+  "category": "Career",
+  "description": "",
+  "completed": false,
+  "timed": false,
+  "subtasks": [], 
+}
+
+
+The timestamp is the milliseconds from flutter firestore like this. Timestamp timestamp = Timestamp.now(); int millis = timestamp.millisecondsSinceEpoch; In this example the task is assumed for today because now deadline was given in he prompt by the user. If a future date is given then give the timestamp for that. If a task is big it can be broken down and you can generate its description too and a title. I will also give a set of categories if the task fits one of those categories then pick one from there. If not then generate a category for the task and return it. A task can have a single category. completed is always false and subtasks is always empty u dont need to gen those.  If they said something like apply for internships tonight you would've assumed today at 8pm. if 8pm hasn't already happened. so pls use common sense there. something like: time: "20:00", timeString: "8 PM", timed: true, and the timestamp for 8pm today. You dont have to essentially give 4 subtasks. just give as many as you think are needed. if the user says something like I want to do X on 21st which is an example date then dont set timed to true, But add the timestamp for the start of that day, also empty time and timeString.
+
+
+Here are the existing categories: $createdCategories
+
+Here is the prompt by the user $task.
+''';
+
+    final systemMessage =
+        OpenAIChatCompletionChoiceMessageModel(
+          content: [
+            OpenAIChatCompletionChoiceMessageContentItemModel.text(
+              "You are a test generator.",
+            ),
+          ],
+          role: OpenAIChatMessageRole.system,
+        );
+
+    final userMessage = OpenAIChatCompletionChoiceMessageModel(
+      content: [
+        OpenAIChatCompletionChoiceMessageContentItemModel.text(
+          prompt,
+        ),
+      ],
+      role: OpenAIChatMessageRole.user,
+    );
+
+    final requestMessages = [systemMessage, userMessage];
+
+    OpenAIChatCompletionModel chatCompletion = await OpenAI
+        .instance
+        .chat
+        .create(
+          model: "gpt-4o-mini",
+          responseFormat: {"type": "json_object"},
+          messages: requestMessages,
+        );
+    notifyListeners();
+    return jsonDecode(
+      chatCompletion.choices[0].message.content![0].text!,
+    );
   }
 }
