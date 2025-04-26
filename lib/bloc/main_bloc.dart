@@ -1,7 +1,8 @@
-import 'dart:io';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dart_openai/dart_openai.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -9,7 +10,6 @@ import 'package:hive/hive.dart';
 import 'package:softec25/models/notes_model.dart';
 import 'package:softec25/models/user_model.dart';
 import 'package:softec25/utils/utils.dart';
-import 'package:dart_openai/dart_openai.dart';
 
 class MainBloc extends ChangeNotifier {
   late Box box;
@@ -462,7 +462,7 @@ Here is the prompt by the user $task.
         OpenAIChatCompletionChoiceMessageModel(
           content: [
             OpenAIChatCompletionChoiceMessageContentItemModel.text(
-              "You are a test generator.",
+              "You are a AI assistant.",
             ),
           ],
           role: OpenAIChatMessageRole.system,

@@ -56,6 +56,10 @@
 			<string>UIInterfaceOrientationLandscapeLeft</string>
 			<string>UIInterfaceOrientationLandscapeRight</string>
 		</array>
+		<key>NSSpeechRecognitionUsageDescription</key>
+		<string>Speech recognition is used to transcribe audio.</string>
+		<key>NSMicrophoneUsageDescription</key>
+		<string>Microphone access is used to record audio.</string>
 		<key>CADisableMinimumFrameDurationOnPhone</key>
 		<true/>
 		<key>UIApplicationSupportsIndirectInputEvents</key>
