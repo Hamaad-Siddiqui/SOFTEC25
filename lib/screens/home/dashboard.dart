@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:softec25/screens/home/home.dart';
 import 'package:softec25/screens/home/settings.dart';
+import 'package:softec25/screens/operations/notes.dart';
 import 'package:softec25/styles.dart';
 
 class Dashboard extends StatefulWidget {
@@ -159,6 +160,23 @@ class _DashboardState extends State<Dashboard>
     }
   }
 
+  // Create a new note
+  void _createNewNote() {
+    _toggleOverlay(); // Close the overlay first
+
+    // Navigate to note detail screen in create mode
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => NoteDetailScreen(
+              // Pass null note to create a new one
+              isEditing: true, // Start in editing mode
+            ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -214,8 +232,7 @@ class _DashboardState extends State<Dashboard>
                                   AppColors.secondaryColor,
 
                               onTap: () {
-                                _toggleOverlay();
-                                // Add action for Note
+                                _createNewNote();
                               },
                             ),
                           ),

@@ -4,7 +4,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:softec25/bloc/main_bloc.dart';
+import 'package:softec25/models/notes_model.dart';
 import 'package:softec25/models/task_model.dart';
+import 'package:softec25/screens/operations/notes.dart';
 import 'package:softec25/styles.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -55,6 +57,13 @@ class _HomeScreenState extends State<HomeScreen>
 
     // Filter tasks for the selected date (initially today)
     _filterTasksByDate();
+
+    // Initialize notes
+    final bloc = Provider.of<MainBloc>(
+      context,
+      listen: false,
+    );
+    bloc.fetchNotes();
   }
 
   // Initialize tasks for different days
@@ -445,12 +454,34 @@ class _HomeScreenState extends State<HomeScreen>
     super.dispose();
   }
 
+  // Navigate to note detail screen
+  void _openNoteDetail(NoteModel? note) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => NoteDetailScreen(note: note),
+      ),
+    );
+
+    // Handle the result (new or updated note)
+    if (result != null && result is NoteModel) {
+      final bloc = Provider.of<MainBloc>(
+        context,
+        listen: false,
+      );
+      if (note == null) {
+        // Created a new note
+        await bloc.createNote(result);
+      } else {
+        // Updated an existing note
+        await bloc.updateNote(result);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final bloc = Provider.of<MainBloc>(
-      context,
-      listen: false,
-    );
+    final bloc = Provider.of<MainBloc>(context);
     return Scaffold(
       backgroundColor: AppColors.scaffoldLightBgColor,
       body: SingleChildScrollView(
@@ -753,7 +784,107 @@ class _HomeScreenState extends State<HomeScreen>
                     ),
                   ),
                 ),
-                SizedBox(height: 20.h),
+
+                SizedBox(height: 30.h),
+
+                // Notes section title
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                  ),
+                  child: Text(
+                    'Your Notes',
+                    style: semiBold.copyWith(
+                      fontSize: 18.sp,
+                      color: AppColors.secondaryColor,
+                    ),
+                  ),
+                ),
+
+                SizedBox(height: 16.h),
+
+                // Notes grid
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                  ),
+                  child: Consumer<MainBloc>(
+                    builder: (context, bloc, _) {
+                      if (bloc.notes.isEmpty) {
+                        return Center(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              vertical: 40.h,
+                            ),
+                            child: Column(
+                              children: [
+                                Icon(
+                                  Icons.note_alt_outlined,
+                                  size: 48.sp,
+                                  color: AppColors
+                                      .grayTextColor
+                                      .withOpacity(0.5),
+                                ),
+                                SizedBox(height: 16.h),
+                                Text(
+                                  'No notes yet',
+                                  style: medium.copyWith(
+                                    fontSize: 16.sp,
+                                    color:
+                                        AppColors
+                                            .grayTextColor,
+                                  ),
+                                ),
+                                SizedBox(height: 8.h),
+                                Text(
+                                  'Tap the + button to create your first note',
+                                  style: regular.copyWith(
+                                    fontSize: 14.sp,
+                                    color: AppColors
+                                        .grayTextColor
+                                        .withOpacity(0.7),
+                                  ),
+                                  textAlign:
+                                      TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
+
+                      return GridView.builder(
+                        shrinkWrap: true,
+                        physics:
+                            const NeverScrollableScrollPhysics(),
+                        gridDelegate:
+                            SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              childAspectRatio: 0.8,
+                              crossAxisSpacing: 12.w,
+                              mainAxisSpacing: 12.h,
+                            ),
+                        itemCount: bloc.notes.length,
+                        itemBuilder: (context, index) {
+                          final note = bloc.notes[index];
+                          return SizedBox(
+                            height: 200.h,
+                            child: NoteCard(
+                              note: note,
+                              onTap:
+                                  () =>
+                                      _openNoteDetail(note),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+
+                SizedBox(
+                  height: 100.h,
+                ), // Extra space at the bottom for better scrolling
               ],
             ),
           ),

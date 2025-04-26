@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive/hive.dart';
+import 'package:softec25/models/notes_model.dart';
 import 'package:softec25/models/user_model.dart';
 import 'package:softec25/utils/utils.dart';
 import 'package:dart_openai/dart_openai.dart';
@@ -17,6 +18,10 @@ class MainBloc extends ChangeNotifier {
   final db = FirebaseFirestore.instance;
   List createdCategories = ["Academics"];
 
+  // Notes list
+  List<NoteModel> _notes = [];
+  List<NoteModel> get notes => _notes;
+
   bool get isLoggedIn => auth.currentUser != null;
 
   UserModel? user;
@@ -27,6 +32,131 @@ class MainBloc extends ChangeNotifier {
             ? '1074530652876-9eeongqb1jai8ui1njqic3jlok57aafl.apps.googleusercontent.com'
             : null,
   );
+
+  // Initialize with some sample notes for demo purposes
+  void initializeSampleNotes() {
+    final now = DateTime.now();
+
+    _notes = [
+      NoteModel(
+        id: '1',
+        title: 'Database Systems Week 4',
+        content:
+            'Normalization is the process of ordering basic data structures to ensure that the basic data created is of good quality. Used to minimize data redundancy and data inconsistencies.\n\nNormalization stage starts from the lightest stage (1NF) to the strictest (5NF). Usually only up to the 3NF or BCNF level as they are sufficient to produce good quality tables.',
+        lastModified: DateTime(2021, 4, 19, 20, 39),
+        tags: [
+          'College',
+          'Lecture',
+          'Daily',
+          'Productivity',
+        ],
+        summary: [
+          'Normalization organizes data structures to ensure data quality',
+          'It reduces data redundancy and inconsistencies',
+          'Process goes from 1NF to 5NF with increasing strictness',
+          'Most databases only need to be normalized to 3NF or BCNF level',
+        ],
+      ),
+      NoteModel(
+        id: '2',
+        title: 'Exploration Ideas',
+        content:
+            'Exploring potential projects for the upcoming hackathon:\n\n• Ticket App - Mobile application for event ticket purchasing and management\n• Travel Website - Interactive travel planning and booking platform\n• Digital Marketing Website - Website showcasing digital marketing services and analytics',
+        lastModified: DateTime(
+          now.year,
+          now.month,
+          now.day - 7,
+        ),
+        tags: ['Design', 'Productivity'],
+        summary: [
+          'Potential hackathon project ideas',
+          'Mobile ticket management application concept',
+          'Travel planning website platform idea',
+          'Digital marketing services website concept',
+        ],
+      ),
+      NoteModel(
+        id: '3',
+        title: 'Grocery List',
+        content:
+            'Today\'s shopping list:\n\n• Cereal\n• Shampoo\n• Toothpaste\n• Apple\n• Cup Noodles',
+        lastModified: DateTime(
+          now.year,
+          now.month,
+          now.day - 9,
+        ),
+        tags: ['Shopping', 'List'],
+        summary: [
+          'Shopping items including personal care products',
+          'Food items including cereal, fruit, and instant meals',
+          'Household essentials purchase list',
+        ],
+      ),
+      NoteModel(
+        id: '4',
+        title: 'Daily Tasks',
+        content:
+            '☐ House chores\n☐ 2 Km run\n☑ Read a book\n☑ Laundry',
+        lastModified: DateTime(
+          now.year,
+          now.month,
+          now.day - 8,
+        ),
+        tags: ['Productivity', 'Daily'],
+        summary: [
+          'Daily task list with completed and pending items',
+          'Combination of household chores and personal activities',
+          'Exercise and reading tasks included',
+        ],
+      ),
+    ];
+
+    notifyListeners();
+  }
+
+  // Create a new note
+  Future<NoteModel> createNote(NoteModel note) async {
+    // In a real app, you would save to Firestore here
+    // await db.collection('notes').doc(note.id).set(note.toJson());
+    _notes.add(note);
+    notifyListeners();
+    return note;
+  }
+
+  // Update an existing note
+  Future<void> updateNote(NoteModel updatedNote) async {
+    // In a real app, you would update Firestore here
+    // await db.collection('notes').doc(updatedNote.id).update(updatedNote.toJson());
+    final index = _notes.indexWhere(
+      (note) => note.id == updatedNote.id,
+    );
+    if (index != -1) {
+      _notes[index] = updatedNote;
+      notifyListeners();
+    }
+  }
+
+  // Delete a note
+  Future<void> deleteNote(String noteId) async {
+    // In a real app, you would delete from Firestore here
+    // await db.collection('notes').doc(noteId).delete();
+    _notes.removeWhere((note) => note.id == noteId);
+    notifyListeners();
+  }
+
+  // Fetch notes for the current user
+  Future<void> fetchNotes() async {
+    // In a real app, you would fetch from Firestore here
+    // final snapshot = await db.collection('notes').where('userId', isEqualTo: auth.currentUser!.uid).get();
+    // _notes = snapshot.docs.map((doc) => NoteModel.fromJson(doc.data())).toList();
+
+    // For demo, we'll just initialize some sample notes if empty
+    if (_notes.isEmpty) {
+      initializeSampleNotes();
+    }
+
+    notifyListeners();
+  }
 
   Future<void> getUserDetails() async {
     if (!isLoggedIn) return;
@@ -326,6 +456,61 @@ The timestamp is the milliseconds from flutter firestore like this. Timestamp ti
 Here are the existing categories: $createdCategories
 
 Here is the prompt by the user $task.
+''';
+
+    final systemMessage =
+        OpenAIChatCompletionChoiceMessageModel(
+          content: [
+            OpenAIChatCompletionChoiceMessageContentItemModel.text(
+              "You are a test generator.",
+            ),
+          ],
+          role: OpenAIChatMessageRole.system,
+        );
+
+    final userMessage = OpenAIChatCompletionChoiceMessageModel(
+      content: [
+        OpenAIChatCompletionChoiceMessageContentItemModel.text(
+          prompt,
+        ),
+      ],
+      role: OpenAIChatMessageRole.user,
+    );
+
+    final requestMessages = [systemMessage, userMessage];
+
+    OpenAIChatCompletionModel chatCompletion = await OpenAI
+        .instance
+        .chat
+        .create(
+          model: "gpt-4o-mini",
+          responseFormat: {"type": "json_object"},
+          messages: requestMessages,
+        );
+    notifyListeners();
+    return jsonDecode(
+      chatCompletion.choices[0].message.content![0].text!,
+    );
+  }
+
+  Future<Map<String, dynamic>> noteSummary(
+    String note,
+  ) async {
+    final String prompt = '''
+Please make sure that you return JSON only because whatever you give back goes directly to my codebase. So you will be given an input from the user that will be their notes and I want you to summarize it in 3 to 4 bullet points (MAX). Also label it in tags. Feel free to add as many tags as appropriate minimum 1, maximum 3 Here is the basic json format which you will return:
+
+{
+	summary:
+	[
+		"bullet 1",
+		"bullet 2",
+		"bullet 3",
+		"bullet 4",
+	],
+	tags: ["tag 1", "tag 2"]
+}
+
+Here is the users note: $note
 ''';
 
     final systemMessage =
