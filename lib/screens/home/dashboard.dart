@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:softec25/screens/home/ai.dart';
 import 'package:softec25/screens/home/home.dart';
 import 'package:softec25/screens/home/settings.dart';
 import 'package:softec25/styles.dart';
@@ -274,7 +275,10 @@ class _DashboardState extends State<Dashboard>
                               ),
                               onTap: () {
                                 _toggleOverlay();
-                                // Add action for Tasks
+                                Navigator.pushNamed(
+                                  context,
+                                  AIScreen.routeName,
+                                );
                               },
                             ),
                           ),

@@ -1,3 +1,4 @@
+import 'package:dart_openai/dart_openai.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,15 +7,15 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:softec25/bloc/main_bloc.dart';
+import 'package:softec25/env/env.dart';
 import 'package:softec25/firebase_options.dart';
 import 'package:softec25/screens/auth/forgot_password.dart';
 import 'package:softec25/screens/auth/login.dart';
 import 'package:softec25/screens/auth/register.dart';
+import 'package:softec25/screens/home/ai.dart';
 import 'package:softec25/screens/home/dashboard.dart';
 import 'package:softec25/screens/home/home.dart';
 import 'package:softec25/screens/home/settings.dart';
-import 'package:dart_openai/dart_openai.dart';
-import 'package:softec25/env/env.dart';
 
 late Box box;
 
@@ -91,6 +92,8 @@ class _MyAppState extends State<MyApp> {
                 (context) => const HomeScreen(),
             SettingScreen.routeName:
                 (context) => const SettingScreen(),
+            AIScreen.routeName:
+                (context) => const AIScreen(),
           },
           initialRoute: Login.routeName,
         ),

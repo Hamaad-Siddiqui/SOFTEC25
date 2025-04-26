@@ -30,6 +30,10 @@ class TaskModel {
   final String category;
   final DateTime createdAt;
   final List<SubTaskModel> subtasks;
+  final bool timed; // Whether the task has a specific time
+  final String time; // The time in HH:MM format if timed
+  final String
+  timeString; // Human readable time string like "8 PM"
 
   TaskModel({
     required this.id,
@@ -41,6 +45,9 @@ class TaskModel {
     required this.createdAt,
     List<SubTaskModel>? subtasks,
     List<String>? subtaskStrings,
+    this.timed = false,
+    this.time = "",
+    this.timeString = "",
   }) : subtasks =
            subtasks ??
            (subtaskStrings
@@ -60,6 +67,9 @@ class TaskModel {
           subtasks
               .map((subtask) => subtask.toMap())
               .toList(),
+      'timed': timed,
+      'time': time,
+      'timeString': timeString,
     };
   }
 
@@ -94,6 +104,9 @@ class TaskModel {
       category: map['category']?.toString() ?? '',
       createdAt: (map['createdAt'] as Timestamp).toDate(),
       subtasks: subtasks,
+      timed: map['timed'] ?? false,
+      time: map['time'] ?? '',
+      timeString: map['timeString'] ?? '',
     );
   }
 
@@ -107,6 +120,9 @@ class TaskModel {
     String? category,
     DateTime? createdAt,
     List<SubTaskModel>? subtasks,
+    bool? timed,
+    String? time,
+    String? timeString,
   }) {
     return TaskModel(
       id: id ?? this.id,
@@ -117,6 +133,53 @@ class TaskModel {
       category: category ?? this.category,
       createdAt: createdAt ?? this.createdAt,
       subtasks: subtasks ?? this.subtasks,
+      timed: timed ?? this.timed,
+      time: time ?? this.time,
+      timeString: timeString ?? this.timeString,
+    );
+  }
+
+  // Factory method to create a TaskModel from AI response
+  static TaskModel fromAIResponse(
+    Map<String, dynamic> response,
+    String id,
+  ) {
+    // Parse timestamp from string
+    DateTime dueDate;
+    try {
+      int timestamp = int.parse(response['timestamp']);
+      dueDate = DateTime.fromMillisecondsSinceEpoch(
+        timestamp,
+      );
+    } catch (e) {
+      dueDate = DateTime.now(); // Fallback to current time
+    }
+
+    // Create subtasks from the response if they exist
+    List<SubTaskModel> subtasks = [];
+    if (response['subtasks'] != null &&
+        response['subtasks'] is List) {
+      subtasks =
+          (response['subtasks'] as List).map((item) {
+            return SubTaskModel(
+              task: item['title'] ?? '',
+              isCompleted: item['completed'] ?? false,
+            );
+          }).toList();
+    }
+
+    return TaskModel(
+      id: id,
+      title: response['title'] ?? '',
+      description: response['description'] ?? '',
+      dueDate: dueDate,
+      isCompleted: response['completed'] ?? false,
+      category: response['category'] ?? 'General',
+      createdAt: DateTime.now(),
+      subtasks: subtasks,
+      timed: response['timed'] ?? false,
+      time: response['time'] ?? '',
+      timeString: response['timeString'] ?? '',
     );
   }
 }
