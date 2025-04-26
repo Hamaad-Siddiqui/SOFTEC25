@@ -457,7 +457,7 @@ class _HomeScreenState extends State<HomeScreen>
         child: SizedBox(
           width: 1.sw,
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w),
+            padding: EdgeInsets.symmetric(horizontal: 0.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -465,65 +465,84 @@ class _HomeScreenState extends State<HomeScreen>
                   height:
                       ScreenUtil().statusBarHeight + 40.h,
                 ),
-                Row(
-                  children: [
-                    bloc.user!.photoUrl == ""
-                        ? SvgPicture.asset(
-                          'assets/svg/aadat.svg',
-                          height: 40.h,
-                          width: 40.h,
-                        )
-                        : CircleAvatar(
-                          radius: 20.h,
-                          backgroundImage: NetworkImage(
-                            bloc.user!.photoUrl,
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                  ),
+                  child: Row(
+                    children: [
+                      bloc.user!.photoUrl == ""
+                          ? SvgPicture.asset(
+                            'assets/svg/aadat.svg',
+                            height: 40.h,
+                            width: 40.h,
+                          )
+                          : CircleAvatar(
+                            radius: 20.h,
+                            backgroundImage: NetworkImage(
+                              bloc.user!.photoUrl,
+                            ),
+                          ),
+                      SizedBox(width: 12.w),
+                      Column(
+                        mainAxisAlignment:
+                            MainAxisAlignment.start,
+                        crossAxisAlignment:
+                            CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Welcome Back',
+                            style: semiBold.copyWith(
+                              fontSize: 20.sp,
+                            ),
+                          ),
+                          Text(
+                            '${bloc.user!.fullName} ! 👋 ',
+                            style: regular.copyWith(
+                              fontSize: 14.sp,
+                              color:
+                                  AppColors.grayTextColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Spacer(),
+                      Container(
+                        width: 32.h,
+                        height: 32.h,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Color(0xFFf0f0f0),
+                            width: 1.w,
                           ),
                         ),
-                    SizedBox(width: 12.w),
-                    Column(
-                      mainAxisAlignment:
-                          MainAxisAlignment.start,
-                      crossAxisAlignment:
-                          CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Welcome Back',
-                          style: semiBold.copyWith(
-                            fontSize: 20.sp,
+                        child: Center(
+                          child: SvgPicture.asset(
+                            'assets/svg/notification.svg',
+                            height: 24.h,
+                            width: 24.h,
                           ),
-                        ),
-                        Text(
-                          '${bloc.user!.fullName} ! 👋 ',
-                          style: regular.copyWith(
-                            fontSize: 14.sp,
-                            color: AppColors.grayTextColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const Spacer(),
-                    Container(
-                      width: 32.h,
-                      height: 32.h,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Color(0xFFf0f0f0),
-                          width: 1.w,
                         ),
                       ),
-                      child: Center(
-                        child: SvgPicture.asset(
-                          'assets/svg/notification.svg',
-                          height: 24.h,
-                          width: 24.h,
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
 
                 SizedBox(height: 30.h),
+
+                // Progress Card
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                  ),
+                  child: ProgressCard(
+                    allTasks: allTasks,
+                    selectedDate: _selectedDate,
+                  ),
+                ),
+
+                SizedBox(height: 20.h),
 
                 // Date Selector Calendar
                 Container(
@@ -646,108 +665,114 @@ class _HomeScreenState extends State<HomeScreen>
 
                 SizedBox(height: 20.h),
 
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.only(
-                    top: 14.h,
-                    left: 14.w,
-                    right: 14.w,
-                    bottom: 28.h,
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
                   ),
-                  decoration: BoxDecoration(
-                    color: Color(
-                      0xFFE0EBFE,
-                    ).withOpacity(0.85),
-                    borderRadius: BorderRadius.circular(
-                      12.r,
+                  child: Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.only(
+                      top: 14.h,
+                      left: 14.w,
+                      right: 14.w,
+                      bottom: 28.h,
                     ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          SvgPicture.asset(
-                            'assets/svg/calendar2.svg',
-                            height: 14.h,
-                            width: 14.w,
-                            colorFilter: ColorFilter.mode(
-                              AppColors.secondaryColor
-                                  .withOpacity(0.9),
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                          SizedBox(width: 8.w),
-                          Text(
-                            DateFormat(
-                              'EEEE, d\'th\' MMMM',
-                            ).format(_selectedDate),
-                            style: medium.copyWith(
-                              height: 1,
-                              fontSize: 12.sp,
-                              color: AppColors
-                                  .secondaryColor
-                                  .withOpacity(0.9),
-                            ),
-                          ),
-                          Spacer(),
-                          // Icon(
-                          //   Icons.chevron_right,
-                          //   size: 18.w,
-                          //   color: AppColors.secondaryColor
-                          //       .withOpacity(0.9),
-                          // ),
-                        ],
+                    decoration: BoxDecoration(
+                      color: Color(
+                        0xFFE0EBFE,
+                      ).withOpacity(0.85),
+                      borderRadius: BorderRadius.circular(
+                        12.r,
                       ),
-                      SizedBox(height: 17.h),
-                      Text(
-                        'You ${_selectedDate.isBefore(DateTime(now.year, now.month, now.day)) ? 'had' : 'have'} ${filteredTasks.where((task) => !task.isCompleted).length}\ntasks left ${_isToday(_selectedDate) ? 'for today' : 'for ${DateFormat('EEEE').format(_selectedDate)}'}',
-                        style: semiBold.copyWith(
-                          fontSize: 18.sp,
-                          color: AppColors.secondaryColor
-                              .withOpacity(0.9),
-                          height: 1.2,
+                    ),
+                    child: Column(
+                      crossAxisAlignment:
+                          CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            SvgPicture.asset(
+                              'assets/svg/calendar2.svg',
+                              height: 15.h,
+                              width: 15.w,
+                              colorFilter: ColorFilter.mode(
+                                AppColors.secondaryColor
+                                    .withOpacity(0.9),
+                                BlendMode.srcIn,
+                              ),
+                            ),
+                            SizedBox(width: 8.w),
+                            Text(
+                              DateFormat(
+                                'EEEE, d\'th\' MMMM',
+                              ).format(_selectedDate),
+                              style: medium.copyWith(
+                                height: 1,
+                                fontSize: 13.sp,
+                                color: AppColors
+                                    .secondaryColor
+                                    .withOpacity(0.9),
+                              ),
+                            ),
+                            Spacer(),
+                            // Icon(
+                            //   Icons.chevron_right,
+                            //   size: 18.w,
+                            //   color: AppColors.secondaryColor
+                            //       .withOpacity(0.9),
+                            // ),
+                          ],
                         ),
-                      ),
-                      SizedBox(height: 17.h),
+                        SizedBox(height: 17.h),
+                        Text(
+                          'You ${_selectedDate.isBefore(DateTime(now.year, now.month, now.day)) ? 'had' : 'have'} ${filteredTasks.where((task) => !task.isCompleted).length}\ntasks left ${_isToday(_selectedDate) ? 'for today' : 'for ${DateFormat('EEEE').format(_selectedDate)}'}',
+                          style: semiBold.copyWith(
+                            fontSize: 18.sp,
+                            color: AppColors.secondaryColor
+                                .withOpacity(0.9),
+                            height: 1.2,
+                          ),
+                        ),
+                        SizedBox(height: 17.h),
 
-                      // Tasks List
-                      ...filteredTasks
-                          .map(
-                            (task) => TaskCard(
-                              task: task,
-                              isLast:
-                                  task ==
-                                  filteredTasks.last,
-                              onTaskStatusChanged: (
-                                isCompleted,
-                                updatedSubtasks,
-                              ) {
-                                setState(() {
-                                  final index = allTasks
-                                      .indexWhere(
-                                        (t) =>
-                                            t.id == task.id,
-                                      );
-                                  if (index != -1) {
-                                    final updatedTask = task
-                                        .copyWith(
-                                          isCompleted:
-                                              isCompleted,
-                                          subtasks:
-                                              updatedSubtasks,
+                        // Tasks List
+                        ...filteredTasks
+                            .map(
+                              (task) => TaskCard(
+                                task: task,
+                                isLast:
+                                    task ==
+                                    filteredTasks.last,
+                                onTaskStatusChanged: (
+                                  isCompleted,
+                                  updatedSubtasks,
+                                ) {
+                                  setState(() {
+                                    final index = allTasks
+                                        .indexWhere(
+                                          (t) =>
+                                              t.id ==
+                                              task.id,
                                         );
-                                    allTasks[index] =
-                                        updatedTask;
-                                  }
-                                  _filterTasksByDate();
-                                });
-                              },
-                            ),
-                          )
-                          .toList(),
-                    ],
+                                    if (index != -1) {
+                                      final updatedTask =
+                                          task.copyWith(
+                                            isCompleted:
+                                                isCompleted,
+                                            subtasks:
+                                                updatedSubtasks,
+                                          );
+                                      allTasks[index] =
+                                          updatedTask;
+                                    }
+                                    _filterTasksByDate();
+                                  });
+                                },
+                              ),
+                            )
+                            .toList(),
+                      ],
+                    ),
                   ),
                 ),
                 SizedBox(height: 20.h),
@@ -935,7 +960,7 @@ class _TaskCardState extends State<TaskCard>
                     Text(
                       widget.task.title,
                       style: medium.copyWith(
-                        fontSize: 12.sp,
+                        fontSize: 15.sp,
                         color: AppColors.secondaryColor,
                         decoration:
                             widget.task.isCompleted
@@ -984,7 +1009,7 @@ class _TaskCardState extends State<TaskCard>
                   child: Text(
                     widget.task.description,
                     style: regular.copyWith(
-                      fontSize: 11.sp,
+                      fontSize: 14.sp,
                       color: AppColors.secondaryColor
                           .withOpacity(0.7),
                       height: 1.2,
@@ -1064,7 +1089,7 @@ class _TaskCardState extends State<TaskCard>
                           Text(
                             subtask.task,
                             style: regular.copyWith(
-                              fontSize: 10.sp,
+                              fontSize: 14.sp,
                               color: AppColors
                                   .secondaryColor
                                   .withOpacity(0.7),
@@ -1099,7 +1124,7 @@ class _TaskCardState extends State<TaskCard>
                     Text(
                       '${DateFormat('h:mm a').format(widget.task.dueDate)}',
                       style: medium.copyWith(
-                        fontSize: 10.sp,
+                        fontSize: 13.sp,
                         color: AppColors.secondaryColor
                             .withOpacity(0.8),
                       ),
@@ -1121,7 +1146,7 @@ class _TaskCardState extends State<TaskCard>
                       child: Text(
                         widget.task.category,
                         style: medium.copyWith(
-                          fontSize: 10.sp,
+                          fontSize: 12.sp,
                           color: AppColors.secondaryColor,
                         ),
                       ),
@@ -1130,6 +1155,340 @@ class _TaskCardState extends State<TaskCard>
                 ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ProgressCard extends StatefulWidget {
+  final List<TaskModel> allTasks;
+  final DateTime selectedDate;
+
+  const ProgressCard({
+    Key? key,
+    required this.allTasks,
+    required this.selectedDate,
+  }) : super(key: key);
+
+  @override
+  State<ProgressCard> createState() => _ProgressCardState();
+}
+
+class _ProgressCardState extends State<ProgressCard> {
+  bool _isDailySelected = true;
+
+  // Calculate daily progress based on today's tasks and subtasks
+  double calculateDailyProgress() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    // Get today's tasks
+    final todayTasks =
+        widget.allTasks
+            .where(
+              (task) =>
+                  task.dueDate.year == today.year &&
+                  task.dueDate.month == today.month &&
+                  task.dueDate.day == today.day,
+            )
+            .toList();
+
+    if (todayTasks.isEmpty) return 0.0;
+
+    // Count total tasks and subtasks
+    int totalTasks = todayTasks.length;
+    int totalSubtasks = todayTasks.fold(
+      0,
+      (sum, task) => sum + task.subtasks.length,
+    );
+    int totalItems = totalTasks + totalSubtasks;
+
+    if (totalItems == 0) return 0.0;
+
+    // Count completed tasks and subtasks
+    int completedTasks =
+        todayTasks.where((task) => task.isCompleted).length;
+    int completedSubtasks = todayTasks.fold(
+      0,
+      (sum, task) =>
+          sum +
+          task.subtasks
+              .where((subtask) => subtask.isCompleted)
+              .length,
+    );
+    int completedItems = completedTasks + completedSubtasks;
+
+    return (completedItems / totalItems) * 100;
+  }
+
+  // Calculate weekly progress based on this week's tasks and subtasks
+  double calculateWeeklyProgress() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    // Calculate the start of the week (Monday)
+    final int weekday = now.weekday;
+    final startOfWeek = today.subtract(
+      Duration(days: weekday - 1),
+    );
+    final endOfWeek = startOfWeek.add(
+      Duration(days: 6),
+    ); // Sunday
+
+    // Get this week's tasks
+    final weekTasks =
+        widget.allTasks
+            .where(
+              (task) =>
+                  task.dueDate.isAfter(
+                    startOfWeek.subtract(Duration(days: 1)),
+                  ) &&
+                  task.dueDate.isBefore(
+                    endOfWeek.add(Duration(days: 1)),
+                  ),
+            )
+            .toList();
+
+    if (weekTasks.isEmpty) return 0.0;
+
+    // Count total tasks and subtasks
+    int totalTasks = weekTasks.length;
+    int totalSubtasks = weekTasks.fold(
+      0,
+      (sum, task) => sum + task.subtasks.length,
+    );
+    int totalItems = totalTasks + totalSubtasks;
+
+    if (totalItems == 0) return 0.0;
+
+    // Count completed tasks and subtasks
+    int completedTasks =
+        weekTasks.where((task) => task.isCompleted).length;
+    int completedSubtasks = weekTasks.fold(
+      0,
+      (sum, task) =>
+          sum +
+          task.subtasks
+              .where((subtask) => subtask.isCompleted)
+              .length,
+    );
+    int completedItems = completedTasks + completedSubtasks;
+
+    return (completedItems / totalItems) * 100;
+  }
+
+  String getProgressMessage(double progress) {
+    if (progress >= 75) {
+      return "You are doing\nwell ";
+    } else if (progress >= 50) {
+      return "You are on\ntrack ";
+    } else if (progress >= 25) {
+      return "Keep up the\neffort ";
+    } else {
+      return "Let's get\nstarted ";
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final progress =
+        _isDailySelected
+            ? calculateDailyProgress()
+            : calculateWeeklyProgress();
+
+    final progressRounded = progress.round();
+
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.only(bottom: 20.h),
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: Color(0xFFCFE6ED).withOpacity(0.85),
+        borderRadius: BorderRadius.circular(16.r),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Toggle switch between Daily and Weekly
+          SizedBox(
+            // alignment: Alignment.centerRight,
+            child: Row(
+              children: [
+                Container(
+                  height: 34.h,
+                  width: 34.h,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: SvgPicture.asset(
+                      'assets/svg/line.svg',
+                      height: 20.h,
+                      width: 20.h,
+                    ),
+                  ),
+                ),
+                Spacer(),
+                Container(
+                  height: 34.h,
+                  width: 200.w,
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(
+                      24.r,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      // Daily Toggle
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _isDailySelected = true;
+                          });
+                        },
+                        child: Container(
+                          width: 100.w,
+                          height: 36.h,
+                          decoration: BoxDecoration(
+                            color:
+                                _isDailySelected
+                                    ? Colors.white
+                                        .withOpacity(0.9)
+                                    : Colors.transparent,
+                            borderRadius:
+                                BorderRadius.circular(24.r),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'Daily',
+                              style: medium.copyWith(
+                                fontSize: 14.sp,
+                                color:
+                                    _isDailySelected
+                                        ? Colors.black
+                                        : Colors.black
+                                            .withOpacity(
+                                              0.7,
+                                            ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Weekly Toggle
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _isDailySelected = false;
+                          });
+                        },
+                        child: Container(
+                          width: 100.w,
+                          height: 36.h,
+                          decoration: BoxDecoration(
+                            color:
+                                !_isDailySelected
+                                    ? Colors.black
+                                    : Colors.transparent,
+                            borderRadius:
+                                BorderRadius.circular(24.r),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'Weekly',
+                              style: medium.copyWith(
+                                fontSize: 14.sp,
+                                color:
+                                    !_isDailySelected
+                                        ? Colors.white
+                                        : Colors.black
+                                            .withOpacity(
+                                              0.7,
+                                            ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          SizedBox(height: 16.h),
+
+          // Your progress title
+          Text(
+            'Your progress',
+            style: medium.copyWith(
+              fontSize: 16.sp,
+              color: Colors.black.withOpacity(0.8),
+            ),
+          ),
+
+          SizedBox(height: 8.h),
+
+          // Progress status and percentage
+          Row(
+            mainAxisAlignment:
+                MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              // Progress message with emoji
+              Column(
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    getProgressMessage(
+                      progress,
+                    ).split('\n')[0],
+                    style: semiBold.copyWith(
+                      fontSize: 22.sp,
+                      color: Colors.black,
+                      height: 1.2,
+                    ),
+                  ),
+                  Row(
+                    crossAxisAlignment:
+                        CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        getProgressMessage(
+                          progress,
+                        ).split('\n')[1],
+                        style: semiBold.copyWith(
+                          fontSize: 22.sp,
+                          color: Colors.black,
+                          height: 1.2,
+                        ),
+                      ),
+                      SizedBox(width: 4.w),
+                      SvgPicture.asset(
+                        'assets/svg/moods/happy.svg',
+                        height: 24.h,
+                        width: 24.h,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+
+              // Percentage
+              Text(
+                '$progressRounded%',
+                style: semiBold.copyWith(
+                  fontSize: 42.sp,
+                  color: Colors.black,
+                ),
+              ),
+            ],
           ),
         ],
       ),
