@@ -478,6 +478,7 @@ class _HomeScreenState extends State<HomeScreen>
                             width: 40.h,
                           )
                           : CircleAvatar(
+                            backgroundColor: Colors.white,
                             radius: 20.h,
                             backgroundImage: NetworkImage(
                               bloc.user!.photoUrl,
@@ -929,8 +930,8 @@ class _TaskCardState extends State<TaskCard>
                         );
                       },
                       child: Container(
-                        width: 14.w,
-                        height: 14.w,
+                        width: 18.w,
+                        height: 18.w,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color:
@@ -954,7 +955,7 @@ class _TaskCardState extends State<TaskCard>
                                 : null,
                       ),
                     ),
-                    SizedBox(width: 8.w),
+                    SizedBox(width: 4.w),
                     Text(
                       widget.task.title,
                       style: medium.copyWith(
@@ -989,8 +990,8 @@ class _TaskCardState extends State<TaskCard>
                           ).animate(_animationController),
                           child: SvgPicture.asset(
                             'assets/svg/arrow_down.svg',
-                            height: 8.w,
-                            width: 8.w,
+                            height: 10.w,
+                            width: 10.w,
                             colorFilter: ColorFilter.mode(
                               AppColors.secondaryColor
                                   .withOpacity(0.9),
@@ -1084,18 +1085,34 @@ class _TaskCardState extends State<TaskCard>
                             ),
                           ),
                           SizedBox(width: 8.w),
-                          Text(
-                            subtask.task,
-                            style: regular.copyWith(
-                              fontSize: 14.sp,
-                              color: AppColors
-                                  .secondaryColor
-                                  .withOpacity(0.7),
-                              decoration:
-                                  subtask.isCompleted
-                                      ? TextDecoration
-                                          .lineThrough
-                                      : TextDecoration.none,
+                          // Make the subtask title tappable too
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                if (!widget
+                                    .task
+                                    .isCompleted) {
+                                  _handleSubtaskCompletion(
+                                    index,
+                                    !subtask.isCompleted,
+                                  );
+                                }
+                              },
+                              child: Text(
+                                subtask.task,
+                                style: regular.copyWith(
+                                  fontSize: 14.sp,
+                                  color: AppColors
+                                      .secondaryColor
+                                      .withOpacity(0.7),
+                                  decoration:
+                                      subtask.isCompleted
+                                          ? TextDecoration
+                                              .lineThrough
+                                          : TextDecoration
+                                              .none,
+                                ),
+                              ),
                             ),
                           ),
                         ],
