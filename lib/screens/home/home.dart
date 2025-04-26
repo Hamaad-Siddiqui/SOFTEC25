@@ -734,41 +734,37 @@ class _HomeScreenState extends State<HomeScreen>
                         SizedBox(height: 17.h),
 
                         // Tasks List
-                        ...filteredTasks
-                            .map(
-                              (task) => TaskCard(
-                                task: task,
-                                isLast:
-                                    task ==
-                                    filteredTasks.last,
-                                onTaskStatusChanged: (
-                                  isCompleted,
-                                  updatedSubtasks,
-                                ) {
-                                  setState(() {
-                                    final index = allTasks
-                                        .indexWhere(
-                                          (t) =>
-                                              t.id ==
-                                              task.id,
-                                        );
-                                    if (index != -1) {
-                                      final updatedTask =
-                                          task.copyWith(
-                                            isCompleted:
-                                                isCompleted,
-                                            subtasks:
-                                                updatedSubtasks,
-                                          );
-                                      allTasks[index] =
-                                          updatedTask;
-                                    }
-                                    _filterTasksByDate();
-                                  });
-                                },
-                              ),
-                            )
-                            .toList(),
+                        ...filteredTasks.map(
+                          (task) => TaskCard(
+                            task: task,
+                            isLast:
+                                task == filteredTasks.last,
+                            onTaskStatusChanged: (
+                              isCompleted,
+                              updatedSubtasks,
+                            ) {
+                              setState(() {
+                                final index = allTasks
+                                    .indexWhere(
+                                      (t) =>
+                                          t.id == task.id,
+                                    );
+                                if (index != -1) {
+                                  final updatedTask = task
+                                      .copyWith(
+                                        isCompleted:
+                                            isCompleted,
+                                        subtasks:
+                                            updatedSubtasks,
+                                      );
+                                  allTasks[index] =
+                                      updatedTask;
+                                }
+                                _filterTasksByDate();
+                              });
+                            },
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -1101,7 +1097,7 @@ class _TaskCardState extends State<TaskCard>
                         ],
                       ),
                     );
-                  }).toList(),
+                  }),
                 ],
 
                 SizedBox(height: 10.h),
@@ -1120,7 +1116,9 @@ class _TaskCardState extends State<TaskCard>
                     ),
                     SizedBox(width: 5.w),
                     Text(
-                      '${DateFormat('h:mm a').format(widget.task.dueDate)}',
+                      DateFormat(
+                        'h:mm a',
+                      ).format(widget.task.dueDate),
                       style: medium.copyWith(
                         fontSize: 13.sp,
                         color: AppColors.secondaryColor
@@ -1165,10 +1163,10 @@ class ProgressCard extends StatefulWidget {
   final DateTime selectedDate;
 
   const ProgressCard({
-    Key? key,
+    super.key,
     required this.allTasks,
     required this.selectedDate,
-  }) : super(key: key);
+  });
 
   @override
   State<ProgressCard> createState() => _ProgressCardState();
@@ -1275,6 +1273,16 @@ class _ProgressCardState extends State<ProgressCard> {
     int completedItems = completedTasks + completedSubtasks;
 
     return (completedItems / totalItems) * 100;
+  }
+
+  String getMood(double progress) {
+    if (progress >= 75) {
+      return "excited";
+    } else if (progress >= 35) {
+      return "happy";
+    } else {
+      return "smile";
+    }
   }
 
   String getProgressMessage(double progress) {
@@ -1430,7 +1438,7 @@ class _ProgressCardState extends State<ProgressCard> {
             ),
           ),
 
-          SizedBox(height: 8.h),
+          SizedBox(height: 4.h),
 
           // Progress status and percentage
           Row(
@@ -1469,9 +1477,9 @@ class _ProgressCardState extends State<ProgressCard> {
                       ),
                       SizedBox(width: 4.w),
                       SvgPicture.asset(
-                        'assets/svg/moods/happy.svg',
-                        height: 24.h,
-                        width: 24.h,
+                        'assets/svg/${getMood(progress)}.svg',
+                        height: 26.h,
+                        width: 26.h,
                       ),
                     ],
                   ),
@@ -1488,6 +1496,7 @@ class _ProgressCardState extends State<ProgressCard> {
               ),
             ],
           ),
+          SizedBox(height: 2.h),
         ],
       ),
     );
