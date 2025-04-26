@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:softec25/screens/home/home.dart';
+import 'package:softec25/screens/home/settings.dart';
 import 'package:softec25/styles.dart';
 
 class Dashboard extends StatefulWidget {
@@ -27,10 +28,7 @@ class _DashboardState extends State<Dashboard> {
       title: 'Progress',
       color: Colors.orange,
     ),
-    const DummyScreen(
-      title: 'Settings',
-      color: Colors.purple,
-    ),
+    SettingScreen(),
   ];
 
   // List of SVG icon paths in order
