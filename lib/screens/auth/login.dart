@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -10,6 +11,14 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(seconds: 5), () {
+      FlutterNativeSplash.remove();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold();

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-// Change Colors here
-// use as `AppColors.primaryColor`, `AppColors.secondaryColor`, etc
 class AppColors {
   static const primaryColor = Color(0xFFffffff);
   static const secondaryColor = Color(0xFF09090b);
@@ -10,10 +8,6 @@ class AppColors {
   static const lightTextColor = Color(0xFF8B8B8B);
   static const darkTextColor = Color(0xFF000000);
 }
-
-// change TextStyles here
-// use as regular.copyWith(), bold.copyWith(), etc
-// and override the properties in the copyWith method
 
 final thin = TextStyle(
   fontFamily: 'Montserrat',

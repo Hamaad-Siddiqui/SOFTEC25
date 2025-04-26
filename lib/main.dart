@@ -1,17 +1,22 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:softec25/bloc/main_bloc.dart';
 import 'package:softec25/firebase_options.dart';
-import 'package:softec25/screens/login.dart';
+import 'package:softec25/screens/auth/login.dart';
 
 late Box box;
 
 void main() async {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
+  await Hive.initFlutter();
+  box = await Hive.openBox('data');
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
