@@ -1,4 +1,4 @@
-package com.example.softec25
+package com.softec25.ai
 
 import io.flutter.embedding.android.FlutterActivity
 
