@@ -94,19 +94,19 @@ class MainBloc extends ChangeNotifier {
       ),
       NoteModel(
         id: '4',
-        title: 'Daily Tasks',
+        title: 'Meeting Notes',
         content:
-            '☐ House chores\n☐ 2 Km run\n☑ Read a book\n☑ Laundry',
+            'Meeting with the team to discuss project updates and next steps:\n\n• Review of last week\'s progress\n• Discussion of challenges faced\n• Planning for next week\'s tasks',
         lastModified: DateTime(
           now.year,
           now.month,
-          now.day - 8,
+          now.day - 10,
         ),
-        tags: ['Productivity', 'Daily'],
+        tags: ['Work', 'Meeting'],
         summary: [
-          'Daily task list with completed and pending items',
-          'Combination of household chores and personal activities',
-          'Exercise and reading tasks included',
+          'Team meeting to review project updates',
+          'Discussion of challenges faced in the past week',
+          'Planning for next week\'s tasks and goals',
         ],
       ),
     ];
