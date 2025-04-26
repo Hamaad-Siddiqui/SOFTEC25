@@ -213,7 +213,7 @@ class _RegisterState extends State<Register> {
                 ),
                 SizedBox(height: 10.h),
                 CustomTextField(
-                  hintText: 'John Doe',
+                  hintText: 'john doe',
                   controller: fullNameController,
                   keyboardType: TextInputType.name,
                   hasNextTextField: true,
