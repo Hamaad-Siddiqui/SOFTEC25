@@ -12,6 +12,7 @@ import 'package:softec25/screens/auth/login.dart';
 import 'package:softec25/screens/auth/register.dart';
 import 'package:softec25/screens/home/dashboard.dart';
 import 'package:softec25/screens/home/home.dart';
+import 'package:softec25/screens/home/settings.dart';
 import 'package:dart_openai/dart_openai.dart';
 import 'package:softec25/env/env.dart';
 
@@ -88,6 +89,8 @@ class _MyAppState extends State<MyApp> {
                 (context) => const Dashboard(),
             HomeScreen.routeName:
                 (context) => const HomeScreen(),
+            SettingScreen.routeName:
+                (context) => const SettingScreen(),
           },
           initialRoute: Login.routeName,
         ),
