@@ -1,7 +1,14 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:hive/hive.dart';
+import 'package:provider/provider.dart';
+import 'package:softec25/bloc/main_bloc.dart';
 import 'package:softec25/firebase_options.dart';
+import 'package:softec25/screens/login.dart';
+
+late Box box;
 
 void main() async {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -11,8 +18,24 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late MainBloc mb;
+
+  bool _init = false;
+
+  Future<void> initialize() async {
+    if (_init) return;
+    _init = true;
+
+    mb.box = box;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,58 +44,30 @@ class MyApp extends StatelessWidget {
       DeviceOrientation.portraitDown,
     ]);
 
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
+    return ScreenUtilInit(
+      designSize: const Size(375, 812),
+      splitScreenMode: true,
+      child: ChangeNotifierProvider(
+        create: (context) => MainBloc(),
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+        builder: (context, child) {
+          mb = context.read<MainBloc>();
 
-  final String title;
+          initialize();
 
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
+          return child!;
+        },
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+        child: MaterialApp(
+          title: 'Personal AI Life Assistant',
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+          routes: {Login.routeName: (context) => const Login()},
+          initialRoute: Login.routeName,
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
+      builder: (context, child) {
+        return child!;
+      },
     );
   }
 }
