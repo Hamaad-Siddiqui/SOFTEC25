@@ -16,6 +16,7 @@ class AppColors {
   static const grayTextColor = Color(0xFF71717A);
   static const hintTextColor = Color(0xFFA0A1AB);
   static const darkTextColor = Color(0xFF000000);
+  static const secondaryTextColor = Color(0xFF1D1D1D);
 }
 
 /// Inter 300 font weight
