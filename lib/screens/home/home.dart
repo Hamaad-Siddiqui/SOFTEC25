@@ -542,8 +542,6 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                 ),
 
-                SizedBox(height: 20.h),
-
                 // Date Selector Calendar
                 Container(
                   height: 86.h,
