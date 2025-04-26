@@ -117,7 +117,7 @@ void showLoadingIndicator(BuildContext context) {
       child: const CircularProgressIndicator(
         strokeWidth: 2,
         valueColor: AlwaysStoppedAnimation<Color>(
-          AppColors.primaryColor,
+          AppColors.secondaryColor,
         ),
       ),
     ),

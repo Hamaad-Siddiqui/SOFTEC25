@@ -63,6 +63,9 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1074530652876',
     projectId: 'personal-ai-life-assistant',
     storageBucket: 'personal-ai-life-assistant.firebasestorage.app',
+    androidClientId: '1074530652876-0rtkunf1gvd91p42gr0vj1jqq2i6p8rf.apps.googleusercontent.com',
+    iosClientId: '1074530652876-9eeongqb1jai8ui1njqic3jlok57aafl.apps.googleusercontent.com',
     iosBundleId: 'com.softec25.ai',
   );
+
 }

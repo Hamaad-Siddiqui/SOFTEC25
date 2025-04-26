@@ -2,8 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
+import 'package:softec25/bloc/main_bloc.dart';
 import 'package:softec25/styles.dart';
+import 'package:softec25/utils/utils.dart';
 import 'package:softec25/widgets/buttons.dart';
+import 'package:softec25/widgets/dialog.dart';
 import 'package:softec25/widgets/textfield.dart';
 
 class ForgotPassword extends StatefulWidget {
@@ -18,6 +22,49 @@ class ForgotPassword extends StatefulWidget {
 
 class _ForgotPasswordState extends State<ForgotPassword> {
   final emailController = TextEditingController();
+
+  Future<void> forgot() async {
+    final email = emailController.text.trim();
+
+    if (email.isEmpty) {
+      showCustomDialog(
+        context,
+        title: 'Error',
+        description: 'Please enter your email',
+      );
+      return;
+    } else if (!isEmailValid(email)) {
+      showCustomDialog(
+        context,
+        title: 'Error',
+        description: 'Enter a valid email',
+      );
+      return;
+    }
+
+    showLoadingIndicator(context);
+    final mp = context.read<MainBloc>();
+    final result = await mp.forgotPassword(email);
+
+    hideLoadingIndicator();
+
+    if (!mounted) return;
+
+    if (result == 'ok') {
+      showCustomDialog(
+        context,
+        title: 'Success',
+        description:
+            "We've sent you a link to reset your password",
+      );
+    } else {
+      showCustomDialog(
+        context,
+        title: 'Error',
+        description: result,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,32 +145,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 SizedBox(height: 40.h),
                 PrimaryButton(
                   text: 'Send Email',
-                  onPressed: () {
-                    // TODO: Implement password reset logic
-                    // For now, just show a success message and go back
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Password reset link sent to ${emailController.text}',
-                          style: medium.copyWith(
-                            color: AppColors.lightTextColor,
-                          ),
-                        ),
-                        backgroundColor:
-                            AppColors.secondaryColor,
-                      ),
-                    );
-
-                    // Go back after showing the message
-                    Future.delayed(
-                      const Duration(seconds: 2),
-                      () {
-                        Navigator.of(context).pop();
-                      },
-                    );
-                  },
+                  onPressed: forgot,
                 ),
               ],
             ),

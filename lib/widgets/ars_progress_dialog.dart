@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:softec25/styles.dart';
 
 class ArsProgressDialog {
   final BuildContext context;
@@ -33,7 +34,9 @@ class ArsProgressDialog {
     this.onDismiss,
     this.loadingWidget,
     this.useSafeArea = false,
-    this.animationDuration = const Duration(milliseconds: 300),
+    this.animationDuration = const Duration(
+      milliseconds: 300,
+    ),
   }) {
     _initProgress();
   }
@@ -67,7 +70,10 @@ class ArsProgressDialog {
   void dismiss([bool rootNavigator = false]) {
     if (_isShowing) {
       _isShowing = false;
-      Navigator.of(context, rootNavigator: rootNavigator).pop();
+      Navigator.of(
+        context,
+        rootNavigator: rootNavigator,
+      ).pop();
     }
   }
 }
@@ -91,7 +97,9 @@ class _ArsProgressDialogWidget extends StatelessWidget {
     this.onDismiss,
     this.loadingWidget,
     this.blur = 0,
-    this.animationDuration = const Duration(milliseconds: 300),
+    this.animationDuration = const Duration(
+      milliseconds: 300,
+    ),
   }) {
     loadingWidget =
         loadingWidget ??
@@ -104,7 +112,12 @@ class _ArsProgressDialogWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
             color: Colors.white,
           ),
-          child: CircularProgressIndicator(strokeWidth: 2),
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation<Color>(
+              AppColors.primaryColor,
+            ),
+          ),
         );
   }
 
@@ -119,7 +132,10 @@ class _ArsProgressDialogWidget extends StatelessWidget {
       dialog: Padding(
         padding:
             MediaQuery.of(context).viewInsets +
-            const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
+            const EdgeInsets.symmetric(
+              horizontal: 20.0,
+              vertical: 24.0,
+            ),
         child: Center(child: loadingWidget),
       ),
     );
@@ -146,7 +162,9 @@ class _DialogBackground extends StatelessWidget {
     this.dismissable,
     this.blur = 0,
     this.onDismiss,
-    this.animationDuration = const Duration(milliseconds: 300),
+    this.animationDuration = const Duration(
+      milliseconds: 300,
+    ),
     required this.color,
   }) {
     _colorOpacity = color.opacity;
@@ -188,7 +206,9 @@ class _DialogBackground extends StatelessWidget {
                       sigmaX: val * blur,
                       sigmaY: val * blur,
                     ),
-                    child: Container(color: Colors.transparent),
+                    child: Container(
+                      color: Colors.transparent,
+                    ),
                   ),
                 ),
                 dialog,

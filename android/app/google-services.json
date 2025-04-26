@@ -12,7 +12,20 @@
           "package_name": "com.softec25.ai"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "1074530652876-0rtkunf1gvd91p42gr0vj1jqq2i6p8rf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.softec25.ai",
+            "certificate_hash": "14b72a2f463f258439c1d7dd5b9cc3d6817ca7b7"
+          }
+        },
+        {
+          "client_id": "1074530652876-463s7dh0t2m777e2j2l32kc0a5t30p4c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDqNRWjwaJ7UjSOOjF8unYCdwxIeahATzA"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1074530652876-463s7dh0t2m777e2j2l32kc0a5t30p4c.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1074530652876-9eeongqb1jai8ui1njqic3jlok57aafl.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.softec25.ai"
+              }
+            }
+          ]
         }
       }
     }

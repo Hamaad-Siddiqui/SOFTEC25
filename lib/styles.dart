@@ -7,6 +7,9 @@ class AppColors {
   static const scaffoldLightBgColor = Color(0xFFFFFFFF);
 
   static const textFieldFillColor = Color(0xFFF7F7F8);
+  static final barrierColor = const Color(
+    0xFF151515,
+  ).withOpacity(0.62);
 
   static const lightTextColor = Color(0xFFFFFFFF);
   static const greyTextColor = Color(0xFF707281);

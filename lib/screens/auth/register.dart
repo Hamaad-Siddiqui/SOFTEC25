@@ -2,9 +2,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
+import 'package:softec25/bloc/main_bloc.dart';
 import 'package:softec25/screens/auth/login.dart';
+import 'package:softec25/screens/home/dashboard.dart';
 import 'package:softec25/styles.dart';
+import 'package:softec25/utils/utils.dart';
 import 'package:softec25/widgets/buttons.dart';
+import 'package:softec25/widgets/dialog.dart';
 import 'package:softec25/widgets/textfield.dart';
 
 class Register extends StatefulWidget {
@@ -22,7 +27,127 @@ class _RegisterState extends State<Register> {
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
-  final confirmPasswordFocusNode = FocusNode();
+  Future<void> _registerWithEmail() async {
+    final fullName = fullNameController.text.trim();
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+    final confirmPassword = confirmPasswordController.text;
+
+    // Validate inputs
+    if (fullName.isEmpty) {
+      showCustomDialog(
+        context,
+        title: 'Error',
+        description: 'Please enter your full name',
+      );
+      return;
+    } else if (email.isEmpty) {
+      showCustomDialog(
+        context,
+        title: 'Error',
+        description: 'Please enter your email',
+      );
+      return;
+    } else if (!isEmailValid(email)) {
+      showCustomDialog(
+        context,
+        title: 'Error',
+        description: 'Enter a valid email',
+      );
+      return;
+    } else if (password.isEmpty) {
+      showCustomDialog(
+        context,
+        title: 'Error',
+        description: 'Please enter your password',
+      );
+      return;
+    } else if (password.length < 6) {
+      showCustomDialog(
+        context,
+        title: 'Error',
+        description:
+            'Password must be at least 6 characters long',
+      );
+      return;
+    } else if (confirmPassword.isEmpty) {
+      showCustomDialog(
+        context,
+        title: 'Error',
+        description: 'Please confirm your password',
+      );
+      return;
+    } else if (password != confirmPassword) {
+      showCustomDialog(
+        context,
+        title: 'Error',
+        description: 'Passwords do not match',
+      );
+      return;
+    }
+
+    final mb = context.read<MainBloc>();
+
+    showLoadingIndicator(context);
+
+    final result = await mb.registerUser(
+      name: fullName,
+      email: email,
+      password: password,
+    );
+
+    hideLoadingIndicator();
+
+    if (!mounted) return;
+
+    if (result == 'ok') {
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        Dashboard.routeName,
+        (route) => false,
+      );
+    } else {
+      // Show error message
+      showCustomDialog(
+        context,
+        title: 'Error',
+        description: result,
+      );
+    }
+  }
+
+  Future<void> _registerWithGoogle() async {
+    final mb = context.read<MainBloc>();
+
+    showLoadingIndicator(context);
+
+    final result = await mb.loginWithGoogle();
+
+    hideLoadingIndicator();
+
+    if (!mounted) return;
+
+    if (result == 'ok') {
+      // Google sign-in successful
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        Dashboard.routeName,
+        (route) => false,
+      );
+    } else if (result == 'banned') {
+      showCustomDialog(
+        context,
+        title: 'Account Banned',
+        description:
+            'Your account has been banned. Please contact support for more information.',
+      );
+    } else {
+      // Show error message
+      showCustomDialog(
+        context,
+        title: 'Error',
+        description: result,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -128,9 +253,6 @@ class _RegisterState extends State<Register> {
                   controller: passwordController,
                   obscureText: true,
                   hasNextTextField: true,
-                  onSubmitted: (value) {
-                    confirmPasswordFocusNode.requestFocus();
-                  },
                 ),
                 SizedBox(height: 20.h),
                 Row(
@@ -147,19 +269,18 @@ class _RegisterState extends State<Register> {
                 CustomTextField(
                   hintText: 'confirm your password',
                   controller: confirmPasswordController,
-                  focusNode: confirmPasswordFocusNode,
                   obscureText: true,
                 ),
                 SizedBox(height: 37.h),
                 PrimaryButton(
                   text: 'Create Account',
-                  onPressed: () {},
+                  onPressed: _registerWithEmail,
                 ),
                 SizedBox(height: 20.h),
                 SecondaryButton(
                   text: 'Sign up with Google',
                   svgIcon: 'assets/svg/google.svg',
-                  onPressed: () {},
+                  onPressed: _registerWithGoogle,
                 ),
                 SizedBox(height: 20.h),
                 Row(
@@ -173,7 +294,7 @@ class _RegisterState extends State<Register> {
                         color: AppColors.greyTextColor,
                       ),
                     ),
-                    SizedBox(width: 5),
+                    SizedBox(width: 3),
                     CupertinoButton(
                       onPressed: () {
                         Navigator.of(

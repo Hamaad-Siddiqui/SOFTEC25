@@ -10,6 +10,7 @@ import 'package:softec25/firebase_options.dart';
 import 'package:softec25/screens/auth/forgot_password.dart';
 import 'package:softec25/screens/auth/login.dart';
 import 'package:softec25/screens/auth/register.dart';
+import 'package:softec25/screens/home/dashboard.dart';
 
 late Box box;
 
@@ -79,6 +80,8 @@ class _MyAppState extends State<MyApp> {
                 (context) => const Register(),
             ForgotPassword.routeName:
                 (context) => const ForgotPassword(),
+            Dashboard.routeName:
+                (context) => const Dashboard(),
           },
           initialRoute: Login.routeName,
         ),
