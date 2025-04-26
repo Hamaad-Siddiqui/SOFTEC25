@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:softec25/screens/home/home.dart';
 import 'package:softec25/styles.dart';
 
 class Dashboard extends StatefulWidget {
@@ -17,7 +18,7 @@ class _DashboardState extends State<Dashboard> {
 
   // List of dummy screens for the navigation
   final List<Widget> _screens = [
-    const DummyScreen(title: 'Home', color: Colors.blue),
+    HomeScreen(),
     const DummyScreen(
       title: 'Calendar',
       color: Colors.green,
@@ -65,7 +66,7 @@ class _DashboardState extends State<Dashboard> {
         child: Column(
           children: [
             // Navigation items row
-            Container(
+            SizedBox(
               height: 80.h,
               child: Row(
                 mainAxisAlignment:
@@ -127,10 +128,10 @@ class DummyScreen extends StatelessWidget {
   final Color color;
 
   const DummyScreen({
-    Key? key,
+    super.key,
     required this.title,
     required this.color,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

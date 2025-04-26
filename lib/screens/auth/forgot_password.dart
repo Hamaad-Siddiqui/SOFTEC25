@@ -97,7 +97,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 Row(
                   children: [
                     SvgPicture.asset(
-                      'assets/svg/adat.svg',
+                      'assets/svg/aadat.svg',
                       height: 30.h,
                     ),
                     SizedBox(width: 8.w),
