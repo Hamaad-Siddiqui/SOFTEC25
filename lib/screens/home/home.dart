@@ -551,15 +551,6 @@ class _HomeScreenState extends State<HomeScreen>
                     borderRadius: BorderRadius.circular(
                       12.r,
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(
-                          0.05,
-                        ),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
                   ),
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
@@ -692,15 +683,15 @@ class _HomeScreenState extends State<HomeScreen>
                           children: [
                             SvgPicture.asset(
                               'assets/svg/calendar2.svg',
-                              height: 15.h,
-                              width: 15.w,
+                              height: 16.h,
+                              width: 16.w,
                               colorFilter: ColorFilter.mode(
                                 AppColors.secondaryColor
                                     .withOpacity(0.9),
                                 BlendMode.srcIn,
                               ),
                             ),
-                            SizedBox(width: 8.w),
+                            SizedBox(width: 6.w),
                             Text(
                               DateFormat(
                                 'EEEE, d\'th\' MMMM',
@@ -714,12 +705,6 @@ class _HomeScreenState extends State<HomeScreen>
                               ),
                             ),
                             Spacer(),
-                            // Icon(
-                            //   Icons.chevron_right,
-                            //   size: 18.w,
-                            //   color: AppColors.secondaryColor
-                            //       .withOpacity(0.9),
-                            // ),
                           ],
                         ),
                         SizedBox(height: 17.h),
@@ -732,9 +717,7 @@ class _HomeScreenState extends State<HomeScreen>
                             height: 1.2,
                           ),
                         ),
-                        SizedBox(height: 17.h),
-
-                        // Tasks List
+                        SizedBox(height: 20.h),
                         ...filteredTasks.map(
                           (task) => TaskCard(
                             task: task,
@@ -951,7 +934,7 @@ class _TaskCardState extends State<TaskCard>
                                 : null,
                       ),
                     ),
-                    SizedBox(width: 4.w),
+                    SizedBox(width: 7.w),
                     Text(
                       widget.task.title,
                       style: medium.copyWith(
@@ -1000,7 +983,7 @@ class _TaskCardState extends State<TaskCard>
                 ),
                 SizedBox(height: 7.h),
                 Padding(
-                  padding: EdgeInsets.only(left: 22.w),
+                  padding: EdgeInsets.only(left: 25.w),
                   child: Text(
                     widget.task.description,
                     style: regular.copyWith(
@@ -1031,7 +1014,7 @@ class _TaskCardState extends State<TaskCard>
 
                     return Padding(
                       padding: EdgeInsets.only(
-                        left: 22.w,
+                        left: 25.w,
                         top: 4.h,
                         bottom: 4.h,
                       ),
@@ -1120,7 +1103,7 @@ class _TaskCardState extends State<TaskCard>
                 SizedBox(height: 10.h),
                 Row(
                   children: [
-                    SizedBox(width: 22.w),
+                    SizedBox(width: 25.w),
                     SvgPicture.asset(
                       'assets/svg/clock.svg',
                       height: 14.h,
