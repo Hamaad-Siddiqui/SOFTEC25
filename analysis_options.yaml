@@ -31,4 +31,4 @@ linter:
 
 # formatter line width
 formatter: 
-  page_width: 80
+  page_width: 60

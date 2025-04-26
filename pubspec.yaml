@@ -85,8 +85,9 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
+  assets:
+    - assets/images/
+    - assets/svg/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -100,23 +101,32 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
+  
   fonts:
-    - family: Montserrat
+    - family: Gotham
       fonts:
-        - asset: assets/fonts/Montserrat-Thin.ttf
-          weight: 100
-        - asset: assets/fonts/Montserrat-Light.ttf
-          weight: 300
-        - asset: assets/fonts/Montserrat-Regular.ttf
-          weight: 400
-        - asset: assets/fonts/Montserrat-Medium.ttf
-          weight: 500
-        - asset: assets/fonts/Montserrat-SemiBold.ttf
-          weight: 600
-        - asset: assets/fonts/Montserrat-Bold.ttf
-          weight: 700
-        - asset: assets/fonts/Montserrat-Black.ttf
-          weight: 900
+      - asset: assets/fonts/Gotham-Book.otf
+        weight: 400
+      - asset: assets/fonts/GothamBold.otf
+        weight: 700
+      - asset: assets/fonts/GothamLight.otf
+        weight: 300
+      - asset: assets/fonts/GothamMedium.otf
+        weight: 500
+
+    - family: Inter
+      fonts:
+      - asset: assets/fonts/Inter-Regular.ttf
+        weight: 400
+      - asset: assets/fonts/Inter-Light.ttf
+        weight: 300
+      - asset: assets/fonts/Inter-Bold.ttf
+        weight: 700
+      - asset: assets/fonts/Inter-SemiBold.ttf
+        weight: 600
+      - asset: assets/fonts/Inter-Medium.ttf
+        weight: 500
+
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package

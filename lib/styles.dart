@@ -4,56 +4,56 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 class AppColors {
   static const primaryColor = Color(0xFFffffff);
   static const secondaryColor = Color(0xFF09090b);
+  static const scaffoldLightBgColor = Color(0xFFFFFFFF);
 
   static const lightTextColor = Color(0xFF8B8B8B);
+  static const greyTextColor = Color(0xFF707281);
   static const darkTextColor = Color(0xFF000000);
 }
 
-final thin = TextStyle(
-  fontFamily: 'Montserrat',
-  fontSize: 14.sp,
-  fontWeight: FontWeight.w100,
-  color: AppColors.darkTextColor,
-);
-
+/// Inter 300 font weight
 final light = TextStyle(
-  fontFamily: 'Montserrat',
-  fontSize: 14.sp,
+  fontFamily: 'Inter',
   fontWeight: FontWeight.w300,
+  fontSize: 14.sp,
   color: AppColors.darkTextColor,
 );
 
+/// Inter 400 font weight
 final regular = TextStyle(
-  fontFamily: 'Montserrat',
+  fontFamily: 'Inter',
   fontSize: 14.sp,
-  fontWeight: FontWeight.w400,
   color: AppColors.darkTextColor,
 );
 
+/// Inter 500 font weight
 final medium = TextStyle(
-  fontFamily: 'Montserrat',
-  fontSize: 14.sp,
+  fontFamily: 'Inter',
   fontWeight: FontWeight.w500,
+  fontSize: 14.sp,
   color: AppColors.darkTextColor,
 );
 
+/// Inter 600 font weight
 final semiBold = TextStyle(
-  fontFamily: 'Montserrat',
-  fontSize: 14.sp,
+  fontFamily: 'Inter',
   fontWeight: FontWeight.w600,
+  fontSize: 14.sp,
   color: AppColors.darkTextColor,
 );
 
+/// Gotham 700 font weight
 final bold = TextStyle(
-  fontFamily: 'Montserrat',
+  fontFamily: 'Gotham',
+  fontWeight: FontWeight.bold,
   fontSize: 14.sp,
-  fontWeight: FontWeight.w700,
   color: AppColors.darkTextColor,
 );
 
-final black = TextStyle(
-  fontFamily: 'Montserrat',
+/// Inter 700 font weight
+final interBold = TextStyle(
+  fontFamily: 'Inter',
+  fontWeight: FontWeight.w700,
   fontSize: 14.sp,
-  fontWeight: FontWeight.w900,
   color: AppColors.darkTextColor,
 );
