@@ -11,6 +11,7 @@ import 'package:softec25/screens/auth/forgot_password.dart';
 import 'package:softec25/screens/auth/login.dart';
 import 'package:softec25/screens/auth/register.dart';
 import 'package:softec25/screens/home/dashboard.dart';
+import 'package:softec25/screens/home/home.dart';
 import 'package:dart_openai/dart_openai.dart';
 import 'package:softec25/env/env.dart';
 
@@ -29,6 +30,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  OpenAI.apiKey = Env.apiKey;
 
   runApp(const MyApp());
 }
@@ -84,6 +86,8 @@ class _MyAppState extends State<MyApp> {
                 (context) => const ForgotPassword(),
             Dashboard.routeName:
                 (context) => const Dashboard(),
+            HomeScreen.routeName:
+                (context) => const HomeScreen(),
           },
           initialRoute: Login.routeName,
         ),
