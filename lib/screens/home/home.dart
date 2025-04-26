@@ -1477,7 +1477,7 @@ class _ProgressCardState extends State<ProgressCard> {
                       ),
                       SizedBox(width: 4.w),
                       SvgPicture.asset(
-                        'assets/svg/${getMood(progress)}.svg',
+                        'assets/svg/moods/${getMood(progress)}.svg',
                         height: 26.h,
                         width: 26.h,
                       ),
