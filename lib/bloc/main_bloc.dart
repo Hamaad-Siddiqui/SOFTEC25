@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,6 +8,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive/hive.dart';
 import 'package:softec25/models/user_model.dart';
 import 'package:softec25/utils/utils.dart';
+import 'package:dart_openai/dart_openai.dart';
 
 class MainBloc extends ChangeNotifier {
   late Box box;
@@ -217,5 +219,44 @@ class MainBloc extends ChangeNotifier {
       warn(e);
       return 'An unknown error occured, please try again';
     }
+  }
+
+  
+  Future generateTests() async {
+    final String prompt = '''
+
+''';
+
+    final systemMessage = OpenAIChatCompletionChoiceMessageModel(
+      content: [
+        OpenAIChatCompletionChoiceMessageContentItemModel.text(
+          "You are a test generator.",
+        ),
+      ],
+      role: OpenAIChatMessageRole.system,
+    );
+
+    final userMessage = OpenAIChatCompletionChoiceMessageModel(
+      content: [
+        OpenAIChatCompletionChoiceMessageContentItemModel.text(
+          prompt,
+        ),
+      ],
+      role: OpenAIChatMessageRole.user,
+    );
+
+    final requestMessages = [
+      systemMessage,
+      userMessage,
+    ];
+
+    OpenAIChatCompletionModel chatCompletion =
+        await OpenAI.instance.chat.create(
+      model: "gpt-4o-mini",
+      responseFormat: {"type": "json_object"},
+      messages: requestMessages,
+    );
+  Map<String, dynamic> response = jsonDecode(chatCompletion.choices[0].message.content![0].text!);
+    notifyListeners();
   }
 }

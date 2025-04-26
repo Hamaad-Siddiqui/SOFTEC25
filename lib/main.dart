@@ -11,6 +11,8 @@ import 'package:softec25/screens/auth/forgot_password.dart';
 import 'package:softec25/screens/auth/login.dart';
 import 'package:softec25/screens/auth/register.dart';
 import 'package:softec25/screens/home/dashboard.dart';
+import 'package:dart_openai/dart_openai.dart';
+import 'package:softec25/env/env.dart';
 
 late Box box;
 
