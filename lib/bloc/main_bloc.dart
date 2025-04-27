@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive/hive.dart';
+import 'package:softec25/models/mood_model.dart';
 import 'package:softec25/models/notes_model.dart';
 import 'package:softec25/models/user_model.dart';
 import 'package:softec25/utils/utils.dart';
@@ -17,6 +18,9 @@ class MainBloc extends ChangeNotifier {
   final auth = FirebaseAuth.instance;
   final db = FirebaseFirestore.instance;
   List createdCategories = ["Academics"];
+
+  // User's mood for today
+  MoodModel? usersMoodToday;
 
   // Notes list
   List<NoteModel> _notes = [];
@@ -653,5 +657,66 @@ Here is the users reflection: $reflection
     return jsonDecode(
       chatCompletion.choices[0].message.content![0].text!,
     );
+  }
+
+  // Fetch today's mood for the current user
+  Future<void> fetchTodayMood() async {
+    if (!isLoggedIn) return;
+
+    try {
+      // Get today's date at start and end of day
+      final now = DateTime.now();
+      final startOfDay = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      );
+      final endOfDay = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        23,
+        59,
+        59,
+      );
+
+      // Query Firestore for mood entries from today
+      final snapshot =
+          await db
+              .collection('users')
+              .doc(auth.currentUser!.uid)
+              .collection('moods')
+              .where(
+                'createdAt',
+                isGreaterThanOrEqualTo: Timestamp.fromDate(
+                  startOfDay,
+                ),
+              )
+              .where(
+                'createdAt',
+                isLessThanOrEqualTo: Timestamp.fromDate(
+                  endOfDay,
+                ),
+              )
+              .orderBy('createdAt', descending: true)
+              .limit(1)
+              .get();
+
+      // Update usersMoodToday if a mood was found
+      if (snapshot.docs.isNotEmpty) {
+        final doc = snapshot.docs.first;
+        usersMoodToday = MoodModel.fromMap(
+          doc.data(),
+          doc.id,
+        );
+      } else {
+        usersMoodToday = null;
+      }
+      notifyListeners();
+    } catch (e) {
+      warn('Error fetching today\'s mood: $e');
+      usersMoodToday = null;
+      notifyListeners();
+    }
   }
 }

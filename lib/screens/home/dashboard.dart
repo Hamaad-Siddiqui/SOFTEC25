@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
+import 'package:softec25/bloc/main_bloc.dart';
 import 'package:softec25/screens/home/ai.dart';
 import 'package:softec25/screens/home/home.dart';
-import 'package:softec25/screens/home/mood_tracking.dart';
 import 'package:softec25/screens/home/settings.dart';
 import 'package:softec25/screens/operations/notes.dart';
 import 'package:softec25/styles.dart';
+import 'package:softec25/utils/utils.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -109,6 +111,10 @@ class _DashboardState extends State<Dashboard>
 
     // Bottom nav bar should be visible initially
     _navBarController.value = 0.0;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchTodayMood();
+    });
   }
 
   @override
@@ -119,6 +125,26 @@ class _DashboardState extends State<Dashboard>
     }
     _navBarController.dispose();
     super.dispose();
+  }
+
+  // Loading state for today's mood
+  bool _isMoodLoading = true;
+
+  // Fetch today's mood
+  Future<void> _fetchTodayMood() async {
+    setState(() {
+      _isMoodLoading = true;
+    });
+    showLoadingIndicator(context);
+
+    final mb = context.read<MainBloc>();
+    await mb.fetchTodayMood();
+
+    hideLoadingIndicator();
+
+    setState(() {
+      _isMoodLoading = false;
+    });
   }
 
   void _onItemTapped(int index) {
@@ -253,7 +279,13 @@ class _DashboardState extends State<Dashboard>
 
                               onTap: () {
                                 _toggleOverlay();
-                                // Add action for Checklist
+                                Navigator.pushNamed(
+                                  context,
+                                  AIScreen.routeName,
+                                  arguments: {
+                                    'type': 'checklist',
+                                  },
+                                );
                               },
                             ),
                           ),
@@ -271,11 +303,6 @@ class _DashboardState extends State<Dashboard>
                                   AppColors.secondaryColor,
                               onTap: () {
                                 _toggleOverlay();
-                                Navigator.pushNamed(
-                                  context,
-                                  MoodTrackingScreen
-                                      .routeName,
-                                );
                               },
                             ),
                           ),
@@ -297,6 +324,9 @@ class _DashboardState extends State<Dashboard>
                                 Navigator.pushNamed(
                                   context,
                                   AIScreen.routeName,
+                                  arguments: {
+                                    'type': 'task',
+                                  },
                                 );
                               },
                             ),
