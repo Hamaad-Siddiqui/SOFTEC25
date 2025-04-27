@@ -27,30 +27,26 @@ class _SettingScreenState extends State<SettingScreen> {
       listen: false,
     );
 
-    // showCustomDialog(
-    //   context,
-    //   title: 'Logout',
-    //   description: 'Are you sure you want to logout?',
-    //   primaryButtonText: 'Logout',
-    //   primaryButtonOnPressed: () async {
-    //     Navigator.of(context).pop(); // Close dialog
+    showCustomDialog(
+      context,
+      title: 'Logout',
+      description: 'Are you sure you want to logout?',
+      buttonText: 'Logout',
+      onPressed: () async {
+        Navigator.of(context).pop(); // Close dialog
 
-    //     // Perform logout
-    //     await bloc.logoutUser();
+        // Perform logout
+        await bloc.logoutUser();
 
-    //     if (!mounted) return;
+        if (!mounted) return;
 
-    //     // Navigate to login screen
-    //     Navigator.of(context).pushNamedAndRemoveUntil(
-    //       Login.routeName,
-    //       (route) => false,
-    //     );
-    //   },
-    //   secondaryButtonText: 'Cancel',
-    //   secondaryButtonOnPressed: () {
-    //     Navigator.of(context).pop(); // Close dialog
-    //   },
-    // );
+        // Navigate to login screen
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          Login.routeName,
+          (route) => false,
+        );
+      },
+    );
   }
 
   @override

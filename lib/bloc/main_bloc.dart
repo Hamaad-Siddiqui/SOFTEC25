@@ -19,7 +19,7 @@ class MainBloc extends ChangeNotifier {
 
   final auth = FirebaseAuth.instance;
   final db = FirebaseFirestore.instance;
-  List createdCategories = ["Academics"];
+  List createdCategories = [];
 
   // User's mood for today
   MoodModel? usersMoodToday;
@@ -1156,5 +1156,15 @@ Here is the users reflection: $reflection
     } catch (e) {
       console('Error updating task: $e');
     }
+  }
+
+  Future<void> logoutUser() async {
+    await auth.signOut();
+    user = null;
+    _reminders = [];
+    _tasks.clear();
+    _notes = [];
+    usersMoodToday = null;
+    notifyListeners();
   }
 }
