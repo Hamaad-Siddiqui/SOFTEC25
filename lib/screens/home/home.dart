@@ -797,7 +797,7 @@ class _HomeScreenState extends State<HomeScreen>
                       Text(
                         'Your Notes',
                         style: semiBold.copyWith(
-                          fontSize: 18.sp,
+                          fontSize: 20.sp,
                           color: AppColors.secondaryColor,
                         ),
                       ),
