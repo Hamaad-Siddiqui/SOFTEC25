@@ -7,9 +7,9 @@ import 'package:softec25/bloc/main_bloc.dart';
 import 'package:softec25/models/mood_model.dart';
 import 'package:softec25/models/notes_model.dart';
 import 'package:softec25/models/task_model.dart';
+import 'package:softec25/screens/home/mood_tracking.dart';
 import 'package:softec25/screens/operations/notes.dart';
 import 'package:softec25/styles.dart';
-import 'package:softec25/utils/utils.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -32,9 +32,6 @@ class _HomeScreenState extends State<HomeScreen>
   late List<TaskModel> allTasks;
   // Filtered tasks for the selected date
   late List<TaskModel> filteredTasks;
-
-  // Loading state for today's mood
-  bool _isMoodLoading = true;
 
   @override
   void initState() {
@@ -69,12 +66,6 @@ class _HomeScreenState extends State<HomeScreen>
       listen: false,
     );
     bloc.fetchNotes();
-
-    // Fetch today's mood
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _fetchTodayMood();
-    });
   }
 
   // Initialize tasks for different days
@@ -490,26 +481,6 @@ class _HomeScreenState extends State<HomeScreen>
     }
   }
 
-  // Fetch today's mood
-  Future<void> _fetchTodayMood() async {
-    setState(() {
-      _isMoodLoading = true;
-    });
-    showLoadingIndicator(context);
-
-    final bloc = Provider.of<MainBloc>(
-      context,
-      listen: false,
-    );
-    await bloc.fetchTodayMood();
-
-    hideLoadingIndicator();
-
-    setState(() {
-      _isMoodLoading = false;
-    });
-  }
-
   // Helper method to get the SVG name from MoodType
   String _getMoodSvgName(MoodType mood) {
     switch (mood) {
@@ -623,6 +594,132 @@ class _HomeScreenState extends State<HomeScreen>
                     selectedDate: _selectedDate,
                   ),
                 ),
+
+                // Mood Button
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                  ),
+                  child: GestureDetector(
+                    onTap: () {
+                      if (bloc.usersMoodToday == null) {
+                        Navigator.pushNamed(
+                          context,
+                          MoodTrackingScreen.routeName,
+                        );
+                      }
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      height: 60.h,
+                      decoration: BoxDecoration(
+                        color: Color(
+                          0xFFf9eca7,
+                        ).withOpacity(0.9),
+                        borderRadius: BorderRadius.circular(
+                          12.r,
+                        ),
+                      ),
+                      child: Consumer<MainBloc>(
+                        builder: (context, bloc, _) {
+                          if (bloc.usersMoodToday == null) {
+                            // Show log mood button
+                            return Row(
+                              mainAxisAlignment:
+                                  MainAxisAlignment.center,
+                              children: [
+                                SvgPicture.asset(
+                                  'assets/svg/add_mood.svg',
+                                  // colorFilter:
+                                  //     ColorFilter.mode(
+                                  //       AppColors
+                                  //           .lightTextColor,
+                                  //       BlendMode.srcIn,
+                                  //     ),
+                                  height: 24.h,
+                                  width: 24.w,
+                                ),
+                                SizedBox(width: 10.w),
+                                Text(
+                                  'Log Today\'s Mood',
+                                  style: semiBold.copyWith(
+                                    fontSize: 16.sp,
+                                    // color:
+                                    //     AppColors
+                                    //         .lightTextColor,
+                                  ),
+                                ),
+                              ],
+                            );
+                          } else {
+                            // Show appropriate message based on mood
+                            final mood =
+                                bloc.usersMoodToday!.mood;
+                            String moodMessage;
+                            String svgName;
+
+                            switch (mood) {
+                              case MoodType.angry:
+                                moodMessage =
+                                    'Taking a deep breath today?';
+                                svgName = 'angry.svg';
+                                break;
+                              case MoodType.sad:
+                                moodMessage =
+                                    'Hope tomorrow brings joy!';
+                                svgName = 'sad.svg';
+                                break;
+                              case MoodType.neutral:
+                                moodMessage =
+                                    'Steady and balanced today';
+                                svgName = 'neutral.svg';
+                                break;
+                              case MoodType.happy:
+                                moodMessage =
+                                    'You\'re having a good day!';
+                                svgName = 'happy.svg';
+                                break;
+                              case MoodType.excited:
+                                moodMessage =
+                                    'Fantastic day ahead!';
+                                svgName = 'excited.svg';
+                                break;
+                            }
+
+                            return Row(
+                              mainAxisAlignment:
+                                  MainAxisAlignment.center,
+                              children: [
+                                SvgPicture.asset(
+                                  'assets/svg/moods/$svgName',
+                                  // colorFilter:
+                                  //     ColorFilter.mode(
+                                  //       AppColors
+                                  //           .lightTextColor,
+                                  //       BlendMode.srcIn,
+                                  //     ),
+                                  height: 24.h,
+                                  width: 24.w,
+                                ),
+                                SizedBox(width: 10.w),
+                                Text(
+                                  moodMessage,
+                                  style: semiBold.copyWith(
+                                    fontSize: 16.sp,
+                                    // color:
+                                    //     AppColors
+                                    //         .lightTextColor,
+                                  ),
+                                ),
+                              ],
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10.h),
 
                 // Date Selector Calendar
                 Container(
