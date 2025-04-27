@@ -493,6 +493,61 @@ Here is the prompt by the user $task.
     );
   }
 
+  Future<Map<String, dynamic>> reminderCreation(
+    String reminder,
+  ) async {
+    final String prompt = '''
+Please make sure that you return JSON because whatever you give back goes directly to my codebase. So you will be given an input from the user that will be the task they want to create. Let's say that they give you the task: "Feed the dogs tonight at 7" so you will return the response like:
+
+{
+  "title": "Feed the dogs",
+  "time" : "19:00", 
+  "timestamp": "1714123456123",
+  "timeString": "7 PM",
+  "description": "",
+}
+
+
+The timestamp is the milliseconds from flutter firestore like this. Timestamp timestamp = Timestamp.now(); int millis = timestamp.millisecondsSinceEpoch; In this example the task is assumed for today because now deadline was given in he prompt by the user. If a future date is given then give the timestamp for that. If a task is big it can be broken down and you can generate its description too and a title. If they said something like apply for internships tonight you would've assumed today at 8pm. if 8pm hasn't already happened. so pls use common sense their. something like: time: "20:00", timeString: "8 PM", and the timestamp for 8pm today. Also the user can also say "egg boil in 10 mins". so remember its your job to structure this even though the task is vague you can make the title something like "Check boiled eggs" and have that reminder set for 10 minutes from right now. 
+
+Here is the prompt by the user $reminder
+''';
+
+    final systemMessage =
+        OpenAIChatCompletionChoiceMessageModel(
+          content: [
+            OpenAIChatCompletionChoiceMessageContentItemModel.text(
+              "You are an AI assistant.",
+            ),
+          ],
+          role: OpenAIChatMessageRole.system,
+        );
+
+    final userMessage = OpenAIChatCompletionChoiceMessageModel(
+      content: [
+        OpenAIChatCompletionChoiceMessageContentItemModel.text(
+          prompt,
+        ),
+      ],
+      role: OpenAIChatMessageRole.user,
+    );
+
+    final requestMessages = [systemMessage, userMessage];
+
+    OpenAIChatCompletionModel chatCompletion = await OpenAI
+        .instance
+        .chat
+        .create(
+          model: "gpt-4o-mini",
+          responseFormat: {"type": "json_object"},
+          messages: requestMessages,
+        );
+    notifyListeners();
+    return jsonDecode(
+      chatCompletion.choices[0].message.content![0].text!,
+    );
+  }
+
   Future<Map<String, dynamic>> noteSummary(
     String note,
   ) async {
