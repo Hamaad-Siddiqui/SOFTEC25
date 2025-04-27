@@ -8,6 +8,7 @@ import 'package:softec25/models/mood_model.dart';
 import 'package:softec25/models/notes_model.dart';
 import 'package:softec25/models/task_model.dart';
 import 'package:softec25/screens/home/mood_tracking.dart';
+import 'package:softec25/screens/home/notification.dart';
 import 'package:softec25/screens/operations/notes.dart';
 import 'package:softec25/styles.dart';
 
@@ -560,21 +561,31 @@ class _HomeScreenState extends State<HomeScreen>
                       ),
                       const Spacer(),
 
-                      Container(
-                        width: 36.h,
-                        height: 36.h,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Color(0xFFf0f0f0),
-                            width: 1.w,
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const NotificationScreen(),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          width: 36.h,
+                          height: 36.h,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Color(0xFFf0f0f0),
+                              width: 1.w,
+                            ),
                           ),
-                        ),
-                        child: Center(
-                          child: SvgPicture.asset(
-                            'assets/svg/notification.svg',
-                            height: 26.h,
-                            width: 26.h,
+                          child: Center(
+                            child: SvgPicture.asset(
+                              'assets/svg/notification.svg',
+                              height: 26.h,
+                              width: 26.h,
+                            ),
                           ),
                         ),
                       ),
