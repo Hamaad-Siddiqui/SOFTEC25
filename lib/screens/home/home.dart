@@ -561,8 +561,8 @@ class _HomeScreenState extends State<HomeScreen>
                       const Spacer(),
 
                       Container(
-                        width: 32.h,
-                        height: 32.h,
+                        width: 36.h,
+                        height: 36.h,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
@@ -573,8 +573,8 @@ class _HomeScreenState extends State<HomeScreen>
                         child: Center(
                           child: SvgPicture.asset(
                             'assets/svg/notification.svg',
-                            height: 24.h,
-                            width: 24.h,
+                            height: 26.h,
+                            width: 26.h,
                           ),
                         ),
                       ),

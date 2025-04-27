@@ -253,7 +253,7 @@ class _DashboardState extends State<Dashboard>
                             child: _buildOptionButton(
                               label: 'Note',
                               iconPath:
-                                  'assets/svg/journal.svg',
+                                  'assets/svg/notes.svg',
                               bgColor:
                                   AppColors.secondaryColor,
 
@@ -271,7 +271,7 @@ class _DashboardState extends State<Dashboard>
                             child: _buildOptionButton(
                               label: 'Checklist',
                               iconPath:
-                                  'assets/svg/line.svg',
+                                  'assets/svg/checklist.svg',
                               bgColor:
                                   AppColors.secondaryColor,
 
@@ -320,7 +320,7 @@ class _DashboardState extends State<Dashboard>
                             child: _buildOptionButton(
                               label: 'Task',
                               iconPath:
-                                  'assets/svg/progress.svg',
+                                  'assets/svg/task.svg',
                               bgColor: const Color(
                                 0xFF3D7EFF,
                               ),
