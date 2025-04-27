@@ -6,6 +6,7 @@ import 'package:softec25/bloc/main_bloc.dart';
 import 'package:softec25/screens/home/ai.dart';
 import 'package:softec25/screens/home/home.dart';
 import 'package:softec25/screens/home/planner.dart';
+import 'package:softec25/screens/home/progress.dart';
 import 'package:softec25/screens/home/settings.dart';
 import 'package:softec25/screens/operations/notes.dart';
 import 'package:softec25/styles.dart';
@@ -39,10 +40,7 @@ class _DashboardState extends State<Dashboard>
   final List<Widget> _screens = [
     HomeScreen(),
     PlannerScreen(),
-    const DummyScreen(
-      title: 'Progress',
-      color: Colors.orange,
-    ),
+    ProgressScreen(),
     SettingScreen(),
   ];
 

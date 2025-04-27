@@ -95,8 +95,8 @@ class _SettingScreenState extends State<SettingScreen> {
                                 child: Image.network(
                                   bloc.user!.photoUrl,
                                   fit: BoxFit.cover,
-                                  width: 100.r,
-                                  height: 100.r,
+                                  width: 120.r,
+                                  height: 120.r,
                                   loadingBuilder: (
                                     context,
                                     child,
@@ -126,8 +126,8 @@ class _SettingScreenState extends State<SettingScreen> {
                               )
                               : SvgPicture.asset(
                                 'assets/svg/account-circle.svg',
-                                height: 60.r,
-                                width: 60.r,
+                                height: 120.r,
+                                width: 120.r,
                                 colorFilter:
                                     ColorFilter.mode(
                                       AppColors
