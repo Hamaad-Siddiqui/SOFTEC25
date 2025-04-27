@@ -5,7 +5,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:softec25/bloc/main_bloc.dart';
+import 'package:softec25/models/reminder_model.dart';
 import 'package:softec25/models/task_model.dart';
+import 'package:softec25/screens/home/planner.dart';
 import 'package:softec25/styles.dart';
 import 'package:softec25/utils/utils.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
@@ -37,6 +39,7 @@ class _AIScreenState extends State<AIScreen> {
   // Type flags to determine if we're creating a task or checklist
   bool _isTask = true; // Default to task
   bool _isChecklist = false;
+  bool _isReminder = false;
 
   @override
   void initState() {
@@ -57,7 +60,7 @@ class _AIScreenState extends State<AIScreen> {
 
     // Check route arguments after the first frame is rendered
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Check if we have arguments to determine if we're creating a task or checklist
+      // Check if we have arguments to determine if we're creating a task, checklist or reminder
       final args =
           ModalRoute.of(context)?.settings.arguments
               as Map<String, dynamic>?;
@@ -65,6 +68,7 @@ class _AIScreenState extends State<AIScreen> {
         setState(() {
           _isTask = args['type'] == 'task';
           _isChecklist = args['type'] == 'checklist';
+          _isReminder = args['type'] == 'reminder';
         });
       }
     });
@@ -168,59 +172,96 @@ class _AIScreenState extends State<AIScreen> {
     try {
       // Show processing dialog that will be updated with success message
       _showProcessingDialog();
-      console('IS CHECKLIST: $_isChecklist');
 
-      // Call the AI service for task or checklist creation based on type
       final mainBloc = context.read<MainBloc>();
-      final response =
-          _isChecklist
-              ? await mainBloc.checklistCreation(input)
-              : await mainBloc.taskCreation(input);
 
-      // Create a new task from the AI response
-      final String taskId =
-          FirebaseFirestore.instance
-              .collection('users')
-              .doc(mainBloc.auth.currentUser!.uid)
-              .collection('tasks')
-              .doc()
-              .id;
+      // Handle different input types (task, checklist, or reminder)
+      if (_isReminder) {
+        // Process as a reminder
+        final response = await mainBloc.reminderCreation(
+          input,
+        );
 
-      final taskModel = TaskModel.fromAIResponse(
-        response,
-        taskId,
-      );
+        // Create a reminder from the AI response
+        final reminder = await mainBloc
+            .createReminderFromAI(response);
 
-      // Save the task to Firestore
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(mainBloc.auth.currentUser!.uid)
-          .collection('tasks')
-          .doc(taskId)
-          .set(taskModel.toMap());
-
-      // Update dialog to show success
-      if (mounted) {
-        Navigator.of(context).pop(); // Close current dialog
-        _showSuccessDialog(
-          taskModel.title,
-        ); // Show success dialog
-      }
-
-      // Close the AI screen after a brief delay
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted && Navigator.of(context).canPop()) {
+        // Update dialog to show success
+        if (mounted) {
           Navigator.of(
             context,
-          ).pop(); // Return to the previous screen
+          ).pop(); // Close current dialog
+          _showSuccessDialog(
+            reminder.title,
+          ); // Show success dialog
+        }
 
+        // Navigate to planner screen after brief delay
+        Future.delayed(const Duration(seconds: 2), () {
+          if (mounted) {
+            // Pop back to previous screen first
+            Navigator.of(context).pop();
+
+            // Navigate to planner screen if not already there
+            Navigator.of(
+              context,
+            ).pushReplacementNamed(PlannerScreen.routeName);
+          }
+        });
+      } else {
+        // Process as a task or checklist
+        final response =
+            _isChecklist
+                ? await mainBloc.checklistCreation(input)
+                : await mainBloc.taskCreation(input);
+
+        // Create a new task from the AI response
+        final String taskId =
+            FirebaseFirestore.instance
+                .collection('users')
+                .doc(mainBloc.auth.currentUser!.uid)
+                .collection('tasks')
+                .doc()
+                .id;
+
+        final taskModel = TaskModel.fromAIResponse(
+          response,
+          taskId,
+        );
+
+        // Save the task to Firestore
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(mainBloc.auth.currentUser!.uid)
+            .collection('tasks')
+            .doc(taskId)
+            .set(taskModel.toMap());
+
+        // Update dialog to show success
+        if (mounted) {
+          Navigator.of(
+            context,
+          ).pop(); // Close current dialog
+          _showSuccessDialog(
+            taskModel.title,
+          ); // Show success dialog
+        }
+
+        // Close the AI screen after a brief delay
+        Future.delayed(const Duration(seconds: 2), () {
           if (mounted && Navigator.of(context).canPop()) {
             Navigator.of(
               context,
             ).pop(); // Return to the previous screen
+
+            if (mounted && Navigator.of(context).canPop()) {
+              Navigator.of(
+                context,
+              ).pop(); // Return to the previous screen
+            }
           }
-        }
-      });
+        });
+      }
     } catch (e) {
       // Hide loading dialog if showing
       if (mounted && Navigator.of(context).canPop()) {
@@ -277,8 +318,8 @@ class _AIScreenState extends State<AIScreen> {
     );
   }
 
-  /// Show a success dialog after task creation
-  void _showSuccessDialog(String taskTitle) {
+  /// Show a success dialog after creation
+  void _showSuccessDialog(String title) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -307,7 +348,9 @@ class _AIScreenState extends State<AIScreen> {
               ),
               SizedBox(height: 20.h),
               Text(
-                _isChecklist
+                _isReminder
+                    ? 'Reminder Created'
+                    : _isChecklist
                     ? 'Checklist Created'
                     : 'Task Created',
                 style: semiBold.copyWith(
@@ -317,7 +360,7 @@ class _AIScreenState extends State<AIScreen> {
               ),
               SizedBox(height: 8.h),
               Text(
-                taskTitle,
+                title,
                 textAlign: TextAlign.center,
                 style: medium.copyWith(
                   fontSize: 16.sp,

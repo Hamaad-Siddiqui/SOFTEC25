@@ -9,6 +9,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive/hive.dart';
 import 'package:softec25/models/mood_model.dart';
 import 'package:softec25/models/notes_model.dart';
+import 'package:softec25/models/reminder_model.dart';
 import 'package:softec25/models/task_model.dart';
 import 'package:softec25/models/user_model.dart';
 import 'package:softec25/utils/utils.dart';
@@ -26,6 +27,13 @@ class MainBloc extends ChangeNotifier {
   // Notes list
   List<NoteModel> _notes = [];
   List<NoteModel> get notes => _notes;
+
+  // Tasks and Reminders list
+  final List<TaskModel> _tasks = [];
+  List<TaskModel> get tasks => _tasks;
+
+  List<ReminderModel> _reminders = [];
+  List<ReminderModel> get reminders => _reminders;
 
   bool get isLoggedIn => auth.currentUser != null;
 
@@ -734,6 +742,259 @@ Here is the users reflection: $reflection
       usersMoodToday = null;
       notifyListeners();
     }
+  }
+
+  // Initialize with some sample reminders for demo purposes
+  void initializeSampleReminders() {
+    final now = DateTime.now();
+
+    _reminders = [
+      ReminderModel(
+        id: '1',
+        title: 'Team Meeting',
+        description:
+            'Weekly sprint planning with development team',
+        dueDate: DateTime(
+          now.year,
+          now.month,
+          now.day,
+          10,
+          0,
+        ),
+        category: 'Work',
+        createdAt: DateTime(
+          now.year,
+          now.month,
+          now.day,
+        ).subtract(const Duration(days: 2)),
+        userId: auth.currentUser!.uid,
+      ),
+      ReminderModel(
+        id: '2',
+        title: 'Doctor Appointment',
+        description: 'Annual checkup with Dr. Smith',
+        dueDate: DateTime(
+          now.year,
+          now.month,
+          now.day + 1,
+          15,
+          30,
+        ),
+        category: 'Health',
+        createdAt: DateTime(
+          now.year,
+          now.month,
+          now.day,
+        ).subtract(const Duration(days: 5)),
+        userId: auth.currentUser!.uid,
+      ),
+      ReminderModel(
+        id: '3',
+        title: 'Call Mom',
+        description: 'Check in about weekend plans',
+        dueDate: DateTime(
+          now.year,
+          now.month,
+          now.day,
+          18,
+          0,
+        ),
+        category: 'Personal',
+        createdAt: DateTime(
+          now.year,
+          now.month,
+          now.day,
+        ).subtract(const Duration(days: 1)),
+        userId: auth.currentUser!.uid,
+      ),
+      ReminderModel(
+        id: '4',
+        title: 'Submit Assignment',
+        description:
+            'Final project for Software Engineering class',
+        dueDate: DateTime(
+          now.year,
+          now.month,
+          now.day + 2,
+          23,
+          59,
+        ),
+        category: 'Academics',
+        createdAt: DateTime(
+          now.year,
+          now.month,
+          now.day,
+        ).subtract(const Duration(days: 10)),
+        userId: auth.currentUser!.uid,
+      ),
+    ];
+
+    notifyListeners();
+  }
+
+  // Fetch reminders for the current user
+  Future<void> fetchReminders() async {
+    if (!isLoggedIn) return;
+
+    try {
+      // For demo purposes, initialize sample reminders if empty
+      if (_reminders.isEmpty) {
+        initializeSampleReminders();
+        return;
+      }
+
+      // In a real app, you would fetch from Firestore
+      // final snapshot = await db
+      //     .collection('users')
+      //     .doc(auth.currentUser!.uid)
+      //     .collection('reminders')
+      //     .orderBy('dueDate')
+      //     .get();
+      //
+      // _reminders = snapshot.docs
+      //     .map((doc) => ReminderModel.fromFirestore(doc))
+      //     .toList();
+      //
+      // notifyListeners();
+    } catch (e) {
+      warn('Error fetching reminders: $e');
+    }
+  }
+
+  // Create a new reminder
+  Future<ReminderModel> createReminder(
+    ReminderModel reminder,
+  ) async {
+    try {
+      // In a real app, you would save to Firestore here
+      // final docRef = await db
+      //     .collection('users')
+      //     .doc(auth.currentUser!.uid)
+      //     .collection('reminders')
+      //     .add(reminder.toFirestore());
+      //
+      // final createdReminder = reminder.copyWith(id: docRef.id);
+
+      // For demo, just add to local list
+      _reminders.add(reminder);
+      notifyListeners();
+      return reminder;
+    } catch (e) {
+      warn('Error creating reminder: $e');
+      throw Exception('Failed to create reminder');
+    }
+  }
+
+  // Update an existing reminder
+  Future<void> updateReminder(
+    ReminderModel updatedReminder,
+  ) async {
+    try {
+      // In a real app, you would update in Firestore
+      // await db
+      //     .collection('users')
+      //     .doc(auth.currentUser!.uid)
+      //     .collection('reminders')
+      //     .doc(updatedReminder.id)
+      //     .update(updatedReminder.toFirestore());
+
+      // For demo, update in local list
+      final index = _reminders.indexWhere(
+        (reminder) => reminder.id == updatedReminder.id,
+      );
+
+      if (index != -1) {
+        _reminders[index] = updatedReminder;
+        notifyListeners();
+      }
+    } catch (e) {
+      warn('Error updating reminder: $e');
+      throw Exception('Failed to update reminder');
+    }
+  }
+
+  // Delete a reminder
+  Future<void> deleteReminder(String reminderId) async {
+    try {
+      // In a real app, you would delete from Firestore
+      // await db
+      //     .collection('users')
+      //     .doc(auth.currentUser!.uid)
+      //     .collection('reminders')
+      //     .doc(reminderId)
+      //     .delete();
+
+      // For demo, remove from local list
+      _reminders.removeWhere(
+        (reminder) => reminder.id == reminderId,
+      );
+      notifyListeners();
+    } catch (e) {
+      warn('Error deleting reminder: $e');
+      throw Exception('Failed to delete reminder');
+    }
+  }
+
+  // Create reminder from AI response
+  Future<ReminderModel> createReminderFromAI(
+    Map<String, dynamic> aiResponse,
+  ) async {
+    final now = DateTime.now();
+
+    // Parse timestamp from the AI response
+    DateTime dueDate;
+    if (aiResponse.containsKey('timestamp') &&
+        aiResponse['timestamp'] != null) {
+      final timestamp = int.tryParse(
+        aiResponse['timestamp'].toString(),
+      );
+      if (timestamp != null) {
+        dueDate = DateTime.fromMillisecondsSinceEpoch(
+          timestamp,
+        );
+      } else {
+        dueDate = now;
+      }
+    } else {
+      dueDate = now;
+    }
+
+    // Create a new reminder from the AI response
+    final reminder = ReminderModel(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      title: aiResponse['title'] ?? 'Untitled Reminder',
+      description: aiResponse['description'] ?? '',
+      dueDate: dueDate,
+      category: aiResponse['category'] ?? 'Personal',
+      createdAt: now,
+      userId: auth.currentUser!.uid,
+    );
+
+    return await createReminder(reminder);
+  }
+
+  // Get reminders and tasks for a specific date
+  List<dynamic> getRemindersAndTasksForDate(DateTime date) {
+    final List<dynamic> items = [];
+
+    // Get reminders for the selected date
+    final dateReminders =
+        _reminders
+            .where(
+              (reminder) =>
+                  reminder.dueDate.year == date.year &&
+                  reminder.dueDate.month == date.month &&
+                  reminder.dueDate.day == date.day,
+            )
+            .toList();
+
+    items.addAll(dateReminders);
+
+    // Get tasks for the selected date
+    // For now we'll use the allTasks list from the home screen
+    // In a production app, you'd likely fetch from a repository or database
+
+    return items;
   }
 
   Future<void> notifyAll() async {

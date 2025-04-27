@@ -27,7 +27,6 @@ class _SettingScreenState extends State<SettingScreen> {
       listen: false,
     );
 
-    // Show confirmation dialog
     // showCustomDialog(
     //   context,
     //   title: 'Logout',
@@ -63,296 +62,325 @@ class _SettingScreenState extends State<SettingScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.scaffoldLightBgColor,
-      body: SingleChildScrollView(
-        child: SizedBox(
-          width: 1.sw,
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height:
-                      ScreenUtil().statusBarHeight + 20.h,
-                ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            SizedBox(height: 60.h),
+            // Profile section at the top
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: 24.w,
+                vertical: 32.h,
+              ),
+              child: Center(
+                child: Column(
+                  children: [
+                    // Profile picture
+                    CircleAvatar(
+                      radius: 50.r,
+                      backgroundColor: AppColors
+                          .secondaryColor
+                          .withOpacity(0.1),
+                      child:
+                          bloc.user != null &&
+                                  bloc
+                                      .user!
+                                      .photoUrl
+                                      .isNotEmpty
+                              ? ClipRRect(
+                                borderRadius:
+                                    BorderRadius.circular(
+                                      50.r,
+                                    ),
+                                child: Image.network(
+                                  bloc.user!.photoUrl,
+                                  fit: BoxFit.cover,
+                                  width: 100.r,
+                                  height: 100.r,
+                                  loadingBuilder: (
+                                    context,
+                                    child,
+                                    loadingProgress,
+                                  ) {
+                                    if (loadingProgress ==
+                                        null)
+                                      return child;
+                                    return Center(
+                                      child: CircularProgressIndicator(
+                                        color:
+                                            AppColors
+                                                .secondaryColor,
+                                        value:
+                                            loadingProgress
+                                                        .expectedTotalBytes !=
+                                                    null
+                                                ? loadingProgress
+                                                        .cumulativeBytesLoaded /
+                                                    loadingProgress
+                                                        .expectedTotalBytes!
+                                                : null,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              )
+                              : SvgPicture.asset(
+                                'assets/svg/account-circle.svg',
+                                height: 60.r,
+                                width: 60.r,
+                                colorFilter:
+                                    ColorFilter.mode(
+                                      AppColors
+                                          .secondaryColor,
+                                      BlendMode.srcIn,
+                                    ),
+                              ),
+                    ),
 
-                // Settings header
-                Text(
-                  'Settings',
-                  style: interBold.copyWith(
-                    fontSize: 32.sp,
-                    color: AppColors.secondaryColor,
+                    SizedBox(height: 16.h),
+
+                    // User name
+                    Text(
+                      bloc.user != null
+                          ? bloc.user!.fullName
+                          : 'User Name',
+                      style: semiBold.copyWith(
+                        fontSize: 22.sp,
+                        color: AppColors.secondaryColor,
+                      ),
+                    ),
+
+                    SizedBox(height: 4.h),
+
+                    // User email
+                    Text(
+                      bloc.user != null
+                          ? bloc.user!.email
+                          : 'user@example.com',
+                      style: regular.copyWith(
+                        fontSize: 15.sp,
+                        color: AppColors.grayTextColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Connected list of settings options with full-width dividers
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16.r),
+                    topRight: Radius.circular(16.r),
                   ),
                 ),
-
-                SizedBox(height: 32.h),
-
-                // Profile section
-                Center(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16.r),
+                    topRight: Radius.circular(16.r),
+                  ),
                   child: Column(
                     children: [
-                      // Profile picture
-                      CircleAvatar(
-                        radius: 55.r,
-                        backgroundColor: Colors.black,
-                        child:
-                            bloc.user != null &&
-                                    bloc
-                                        .user!
-                                        .photoUrl
-                                        .isNotEmpty
-                                ? ClipRRect(
-                                  borderRadius:
-                                      BorderRadius.circular(
-                                        55.r,
-                                      ),
-                                  child: Image.network(
-                                    bloc.user!.photoUrl,
-                                    fit: BoxFit.cover,
-                                    width: 110.r,
-                                    height: 110.r,
-                                  ),
-                                )
-                                : SvgPicture.asset(
-                                  'assets/svg/aadat.svg',
-                                  height: 60.r,
-                                  width: 60.r,
-                                  colorFilter:
-                                      const ColorFilter.mode(
-                                        Colors.white,
-                                        BlendMode.srcIn,
-                                      ),
-                                ),
+                      // Top divider (above the first item)
+                      Divider(
+                        height: 1,
+                        thickness: 0.5,
+                        color: Colors.grey.withOpacity(0.3),
                       ),
 
-                      SizedBox(height: 16.h),
+                      Expanded(
+                        child: ListView(
+                          physics:
+                              const BouncingScrollPhysics(),
+                          padding: EdgeInsets.zero,
+                          children: [
+                            // Edit Profile
+                            _buildSettingOption(
+                              svgPath:
+                                  'assets/svg/edit-profile.svg',
+                              title: 'Edit Profile',
+                              onTap: () {
+                                // Handle edit profile
+                              },
+                            ),
 
-                      // User name
-                      Text(
-                        bloc.user != null
-                            ? bloc.user!.fullName
-                            : 'User Name',
-                        style: semiBold.copyWith(
-                          fontSize: 24.sp,
-                          color: AppColors.secondaryColor,
-                        ),
-                      ),
+                            // Dark Mode with switch
+                            _buildSettingOptionWithSwitch(
+                              hasPadding: false,
+                              svgPath:
+                                  'assets/svg/dark-mode.svg',
+                              title: 'Dark Mode',
+                              value: _darkMode,
+                              onChanged: (value) {
+                                setState(() {
+                                  _darkMode = value;
+                                });
+                              },
+                            ),
 
-                      SizedBox(height: 6.h),
+                            // Notification Style
+                            _buildSettingOption(
+                              svgPath:
+                                  'assets/svg/notification-style.svg',
+                              title: 'Notification Style',
+                              onTap: () {
+                                // Handle notification style
+                              },
+                            ),
 
-                      // User email
-                      Text(
-                        bloc.user != null
-                            ? bloc.user!.email
-                            : 'user@example.com',
-                        style: regular.copyWith(
-                          fontSize: 16.sp,
-                          color: AppColors.grayTextColor,
+                            // Customization
+                            _buildSettingOption(
+                              svgPath:
+                                  'assets/svg/customization.svg',
+                              title: 'Customization',
+                              onTap: () {
+                                // Handle customization
+                              },
+                            ),
+
+                            // Change Password
+                            _buildSettingOption(
+                              svgPath:
+                                  'assets/svg/change-password.svg',
+                              title: 'Change Password',
+                              onTap: () {
+                                // Handle change password
+                              },
+                            ),
+
+                            // Logout
+                            _buildSettingOption(
+                              svgPath:
+                                  'assets/svg/logout.svg',
+                              title: 'Logout',
+                              onTap: _handleLogout,
+                              showDivider: true,
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
                 ),
-
-                SizedBox(height: 30.h),
-
-                // Settings options list - each item designed as a card
-                _buildSettingOption(
-                  iconWidget: SvgPicture.asset(
-                    'assets/svg/edit-profile.svg',
-                    width: 24.h,
-                    height: 24.h,
-                    colorFilter: ColorFilter.mode(
-                      AppColors.secondaryColor,
-                      BlendMode.srcIn,
-                    ),
-                  ),
-                  title: 'Edit Profile',
-                  onTap: () {
-                    // Handle edit profile
-                  },
-                ),
-
-                _buildSettingOptionWithSwitch(
-                  title: 'Dark Mode',
-                  value: _darkMode,
-                  onChanged: (value) {
-                    setState(() {
-                      _darkMode = value;
-                    });
-                  },
-                ),
-
-                _buildSettingOption(
-                  iconWidget: SvgPicture.asset(
-                    'assets/svg/notification.svg',
-                    width: 24.h,
-                    height: 24.h,
-                    colorFilter: ColorFilter.mode(
-                      AppColors.secondaryColor,
-                      BlendMode.srcIn,
-                    ),
-                  ),
-                  title: 'Notification Style',
-                  onTap: () {
-                    // Handle notification style
-                  },
-                ),
-
-                _buildSettingOption(
-                  iconWidget: Icon(
-                    Icons.dashboard_customize_outlined,
-                    size: 24.h,
-                    color: AppColors.secondaryColor,
-                  ),
-                  title: 'Customization',
-                  onTap: () {
-                    // Handle customization
-                  },
-                ),
-
-                _buildSettingOption(
-                  iconWidget: Icon(
-                    Icons.key,
-                    size: 24.h,
-                    color: AppColors.secondaryColor,
-                  ),
-                  title: 'Change Password',
-                  onTap: () {
-                    // Handle change password
-                  },
-                ),
-
-                _buildSettingOption(
-                  iconWidget: Icon(
-                    Icons.logout,
-                    size: 24.h,
-                    color: AppColors.secondaryColor,
-                  ),
-                  title: 'Logout',
-                  onTap: _handleLogout,
-                ),
-
-                SizedBox(height: 16.h),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildSettingOption({
-    required Widget iconWidget,
+    required String svgPath,
     required String title,
     required VoidCallback onTap,
+    bool showDivider = true,
   }) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 12.h),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(4.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
+    return Column(
+      children: [
+        InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(4.r),
           child: Padding(
             padding: EdgeInsets.symmetric(
-              horizontal: 16.w,
-              vertical: 12.h,
+              horizontal: 24.w,
+              vertical: 20.h,
             ),
             child: Row(
               children: [
-                // Icon
-                SizedBox(
-                  width: 32.h,
-                  height: 32.h,
-                  child: iconWidget,
+                // SVG Icon (without container)
+                SvgPicture.asset(
+                  svgPath,
+                  width: 24.h,
+                  height: 24.h,
+                  colorFilter: ColorFilter.mode(
+                    Colors.black,
+                    BlendMode.srcIn,
+                  ),
                 ),
-                SizedBox(width: 16.w),
+                SizedBox(width: 24.w),
                 Text(
                   title,
                   style: semiBold.copyWith(
                     fontSize: 16.sp,
-                    color: AppColors.secondaryColor,
+                    color: Colors.black,
                   ),
                 ),
-                Spacer(),
+                const Spacer(),
                 Icon(
-                  Icons.chevron_right_rounded,
-                  size: 24.h,
-                  color: AppColors.secondaryColor,
+                  Icons.arrow_forward_ios_rounded,
+                  size: 16.h,
+                  color: Colors.black.withOpacity(0.5),
                 ),
               ],
             ),
           ),
         ),
-      ),
+        if (showDivider)
+          Divider(
+            height: 1,
+            thickness: 0.5,
+            color: Colors.grey.withOpacity(0.3),
+          ),
+      ],
     );
   }
 
   Widget _buildSettingOptionWithSwitch({
+    bool hasPadding = true,
+    required String svgPath,
     required String title,
     required bool value,
     required ValueChanged<bool> onChanged,
   }) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 12.h),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(4.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: 24.w,
+            vertical: hasPadding ? 20.h : 12.h,
           ),
-        ],
-      ),
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: 16.w,
-          vertical: 12.h,
-        ),
-        child: Row(
-          children: [
-            // Moon icon for dark mode
-            SizedBox(
-              width: 32.h,
-              height: 32.h,
-              child: Icon(
-                Icons.dark_mode,
-                size: 24.h,
-                color: AppColors.secondaryColor,
+          child: Row(
+            children: [
+              // SVG Icon (without container)
+              SvgPicture.asset(
+                svgPath,
+                width: 24.h,
+                height: 24.h,
+                colorFilter: ColorFilter.mode(
+                  Colors.black,
+                  BlendMode.srcIn,
+                ),
               ),
-            ),
-            SizedBox(width: 16.w),
-            Text(
-              title,
-              style: semiBold.copyWith(
-                fontSize: 16.sp,
-                color: AppColors.secondaryColor,
+              SizedBox(width: 24.w),
+              Text(
+                title,
+                style: semiBold.copyWith(
+                  fontSize: 16.sp,
+                  color: Colors.black,
+                ),
               ),
-            ),
-            Spacer(),
-            // Custom switch that looks more like the one in the image
-            CupertinoSwitch(
-              value: value,
-              onChanged: onChanged,
-              activeTrackColor: AppColors.secondaryColor,
-            ),
-          ],
+              const Spacer(),
+              // Custom switch that looks like the one in the image
+              CupertinoSwitch(
+                value: value,
+                onChanged: onChanged,
+                activeTrackColor: Colors.black,
+                inactiveTrackColor: Colors.grey.withOpacity(
+                  0.3,
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
+        Divider(
+          height: 1,
+          thickness: 0.5,
+          color: Colors.grey.withOpacity(0.3),
+        ),
+      ],
     );
   }
 }
