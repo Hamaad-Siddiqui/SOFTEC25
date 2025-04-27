@@ -65,13 +65,6 @@ class _MoodTrackingScreenState
             Navigator.of(context).pop();
           },
         ),
-        title: Text(
-          'Mood Tracking',
-          style: semiBold.copyWith(
-            fontSize: 18.sp,
-            color: AppColors.darkTextColor,
-          ),
-        ),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -215,7 +208,10 @@ class _MoodTrackingScreenState
                   style: ElevatedButton.styleFrom(
                     backgroundColor:
                         AppColors.secondaryColor,
-                    minimumSize: Size(200.w, 50.h),
+                    minimumSize: Size(
+                      double.infinity.w,
+                      50.h,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(
                         12.r,
