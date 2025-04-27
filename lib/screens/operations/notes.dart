@@ -249,221 +249,126 @@ class _NoteDetailScreenState extends State<NoteDetailScreen>
                           crossAxisAlignment:
                               CrossAxisAlignment.start,
                           children: [
-                            // Title with background
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 16.w,
-                                vertical: 12.h,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius:
-                                    BorderRadius.circular(
-                                      16.r,
-                                    ),
-                                border: Border.all(
-                                  color: Colors.grey
-                                      .withOpacity(0.2),
-                                  width: 1,
-                                ),
-                              ),
-                              child: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment
-                                        .start,
-                                children: [
-                                  // Title
-                                  if (_isEditing)
-                                    TextField(
-                                      controller:
-                                          _titleController,
-                                      style: semiBold.copyWith(
-                                        fontSize: 24.sp,
-                                        color:
-                                            AppColors
-                                                .darkTextColor,
-                                      ),
-                                      decoration: InputDecoration(
-                                        hintText: 'Title',
-                                        border:
-                                            InputBorder
-                                                .none,
-                                        contentPadding:
-                                            EdgeInsets.zero,
-                                        hintStyle: semiBold.copyWith(
-                                          fontSize: 24.sp,
-                                          color: AppColors
-                                              .grayTextColor
-                                              .withOpacity(
-                                                0.6,
-                                              ),
-                                        ),
-                                      ),
-                                    )
-                                  else
-                                    Text(
-                                      _titleController.text,
-                                      style: semiBold.copyWith(
-                                        fontSize: 24.sp,
-                                        color:
-                                            AppColors
-                                                .darkTextColor,
-                                      ),
-                                    ),
-
-                                  SizedBox(height: 12.h),
-
-                                  // Last modified date
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons
-                                            .access_time_rounded,
-                                        size: 16.sp,
-                                        color:
-                                            AppColors
-                                                .grayTextColor,
-                                      ),
-                                      SizedBox(width: 6.w),
-                                      Text(
-                                        widget.note != null
-                                            ? DateFormat(
-                                              'dd MMMM yyyy, HH:mm',
-                                            ).format(
-                                              widget
-                                                  .note!
-                                                  .lastModified,
-                                            )
-                                            : DateFormat(
-                                              'dd MMMM yyyy, HH:mm',
-                                            ).format(
-                                              DateTime.now(),
-                                            ),
-                                        style: medium.copyWith(
-                                          fontSize: 14.sp,
-                                          color:
-                                              AppColors
-                                                  .grayTextColor,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                            // Date at the top
+                            Text(
+                              DateFormat('dd MMM')
+                                  .format(
+                                    widget
+                                            .note
+                                            ?.lastModified ??
+                                        DateTime.now(),
+                                  )
+                                  .toUpperCase(),
+                              style: semiBold.copyWith(
+                                fontSize: 14.sp,
+                                color:
+                                    AppColors.grayTextColor,
+                                letterSpacing: 1.0,
                               ),
                             ),
 
-                            SizedBox(height: 20.h),
+                            SizedBox(height: 12.h),
 
-                            // Tags
-                            if (_tags.isNotEmpty)
-                              Container(
-                                padding:
-                                    EdgeInsets.symmetric(
-                                      horizontal: 16.w,
-                                      vertical: 12.h,
-                                    ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius:
-                                      BorderRadius.circular(
-                                        16.r,
-                                      ),
-                                  border: Border.all(
-                                    color: Colors.grey
-                                        .withOpacity(0.2),
-                                    width: 1,
-                                  ),
+                            // Title
+                            if (_isEditing)
+                              TextField(
+                                controller:
+                                    _titleController,
+                                style: semiBold.copyWith(
+                                  fontSize: 28.sp,
+                                  color:
+                                      AppColors
+                                          .darkTextColor,
                                 ),
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment
-                                          .start,
-                                  children: [
-                                    Text(
-                                      'Tags',
-                                      style: medium.copyWith(
-                                        fontSize: 14.sp,
-                                        color:
-                                            AppColors
-                                                .grayTextColor,
+                                decoration: InputDecoration(
+                                  hintText: 'Title',
+                                  border: InputBorder.none,
+                                  contentPadding:
+                                      EdgeInsets.zero,
+                                  hintStyle: semiBold
+                                      .copyWith(
+                                        fontSize: 28.sp,
+                                        color: AppColors
+                                            .grayTextColor
+                                            .withOpacity(
+                                              0.6,
+                                            ),
                                       ),
-                                    ),
-                                    SizedBox(height: 8.h),
-                                    Wrap(
-                                      spacing: 8.w,
-                                      runSpacing: 8.h,
-                                      children:
-                                          _tags.map((tag) {
-                                            return Container(
-                                              padding: EdgeInsets.symmetric(
-                                                horizontal:
-                                                    12.w,
-                                                vertical:
-                                                    6.h,
-                                              ),
-                                              decoration: BoxDecoration(
-                                                color: Color(
-                                                  0xFFFED4E9,
-                                                ), // Pink for tags
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                      16.r,
-                                                    ),
-                                              ),
-                                              child: Text(
-                                                tag,
-                                                style: medium.copyWith(
-                                                  fontSize:
-                                                      12.sp,
-                                                  color: Color(
-                                                    0xFFB86684,
-                                                  ),
-                                                ),
-                                              ),
-                                            );
-                                          }).toList(),
-                                    ),
-                                  ],
+                                ),
+                              )
+                            else
+                              Text(
+                                _titleController.text,
+                                style: semiBold.copyWith(
+                                  fontSize: 28.sp,
+                                  color:
+                                      AppColors
+                                          .darkTextColor,
                                 ),
                               ),
 
+                            SizedBox(height: 16.h),
+
+                            // Tags
                             if (_tags.isNotEmpty)
-                              SizedBox(height: 20.h),
+                              Wrap(
+                                spacing: 8.w,
+                                runSpacing: 8.h,
+                                children:
+                                    _tags.map((tag) {
+                                      return Container(
+                                        padding:
+                                            EdgeInsets.symmetric(
+                                              horizontal:
+                                                  12.w,
+                                              vertical: 6.h,
+                                            ),
+                                        decoration:
+                                            BoxDecoration(
+                                              color: Color(
+                                                0xFF1f1f1f,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                    16.r,
+                                                  ),
+                                            ),
+                                        child: Text(
+                                          tag,
+                                          style: medium
+                                              .copyWith(
+                                                fontSize:
+                                                    12.sp,
+                                                color: Color(
+                                                  0xFFffffff,
+                                                ),
+                                              ),
+                                        ),
+                                      );
+                                    }).toList(),
+                              ),
+
+                            if (_tags.isNotEmpty)
+                              SizedBox(height: 24.h),
 
                             // Content
                             Container(
                               width: double.infinity,
                               padding: EdgeInsets.all(16.w),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: Color(
+                                  0xFFF8F8F8,
+                                ), // Very light grey
                                 borderRadius:
                                     BorderRadius.circular(
                                       16.r,
                                     ),
-                                border: Border.all(
-                                  color: Colors.grey
-                                      .withOpacity(0.2),
-                                  width: 1,
-                                ),
                               ),
                               child: Column(
                                 crossAxisAlignment:
                                     CrossAxisAlignment
                                         .start,
                                 children: [
-                                  if (!_isEditing)
-                                    Text(
-                                      'Content',
-                                      style: medium.copyWith(
-                                        fontSize: 14.sp,
-                                        color:
-                                            AppColors
-                                                .grayTextColor,
-                                      ),
-                                    ),
-                                  if (!_isEditing)
-                                    SizedBox(height: 8.h),
-
                                   if (_isEditing)
                                     TextField(
                                       controller:
@@ -513,7 +418,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen>
                               ),
                             ),
 
-                            SizedBox(height: 20.h),
+                            SizedBox(height: 24.h),
 
                             // Summary section (only if available and not editing)
                             if (_summary.isNotEmpty &&
@@ -524,49 +429,27 @@ class _NoteDetailScreenState extends State<NoteDetailScreen>
                                   16.w,
                                 ),
                                 decoration: BoxDecoration(
-                                  color:
-                                      Colors
-                                          .white, // Changed to white
+                                  color: Color(
+                                    0xFFF8F8F8,
+                                  ), // Very light grey
                                   borderRadius:
                                       BorderRadius.circular(
                                         16.r,
                                       ),
-                                  border: Border.all(
-                                    color: Colors.grey
-                                        .withOpacity(0.2),
-                                    width: 1,
-                                  ),
                                 ),
                                 child: Column(
                                   crossAxisAlignment:
                                       CrossAxisAlignment
                                           .start,
                                   children: [
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons
-                                              .summarize_rounded,
-                                          size: 20.sp,
-                                          color:
-                                              AppColors
-                                                  .darkTextColor, // Changed to dark text color
-                                        ),
-                                        SizedBox(
-                                          width: 8.w,
-                                        ),
-                                        Text(
-                                          'Summary',
-                                          style: semiBold
-                                              .copyWith(
-                                                fontSize:
-                                                    18.sp,
-                                                color:
-                                                    AppColors
-                                                        .darkTextColor, // Changed to dark text color
-                                              ),
-                                        ),
-                                      ],
+                                    Text(
+                                      'Summary',
+                                      style: semiBold.copyWith(
+                                        fontSize: 18.sp,
+                                        color:
+                                            AppColors
+                                                .darkTextColor,
+                                      ),
                                     ),
 
                                     SizedBox(height: 16.h),
@@ -584,29 +467,14 @@ class _NoteDetailScreenState extends State<NoteDetailScreen>
                                               CrossAxisAlignment
                                                   .start,
                                           children: [
-                                            Container(
-                                              width: 20.w,
-                                              height: 20.h,
-                                              decoration: BoxDecoration(
-                                                color: Colors
-                                                    .grey
-                                                    .withOpacity(
-                                                      0.1,
-                                                    ), // Light grey background
-                                                shape:
-                                                    BoxShape
-                                                        .circle,
-                                              ),
-                                              child: Center(
-                                                child: Text(
-                                                  '${index + 1}',
-                                                  style: semiBold.copyWith(
-                                                    fontSize:
-                                                        12.sp,
-                                                    color:
-                                                        AppColors.darkTextColor, // Dark text color
-                                                  ),
-                                                ),
+                                            Text(
+                                              '•', // Bullet point instead of numbered container
+                                              style: semiBold.copyWith(
+                                                fontSize:
+                                                    16.sp,
+                                                color:
+                                                    AppColors
+                                                        .darkTextColor,
                                               ),
                                             ),
                                             SizedBox(
@@ -620,7 +488,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen>
                                                       15.sp,
                                                   color:
                                                       AppColors
-                                                          .darkTextColor, // Dark text color
+                                                          .darkTextColor,
                                                   height:
                                                       1.4,
                                                 ),
@@ -669,19 +537,40 @@ class NoteCard extends StatelessWidget {
           child: AnimatedContainer(
             duration: Duration(milliseconds: 300),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Color(
+                0xfff6f6f6,
+              ), // Light grey background fill
               borderRadius: BorderRadius.circular(16.r),
-              border: Border.all(
-                color: Colors.grey.withOpacity(0.2),
-                width: 1,
-              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Date at the top
+                Padding(
+                  padding: EdgeInsets.only(
+                    top: 16.w,
+                    left: 16.w,
+                    right: 16.w,
+                  ),
+                  child: Text(
+                    DateFormat('dd MMM')
+                        .format(note.lastModified)
+                        .toUpperCase(),
+                    style: regular.copyWith(
+                      fontSize: 12.sp,
+                      color: AppColors.grayTextColor,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+
                 // Note title
                 Padding(
-                  padding: EdgeInsets.all(16.w),
+                  padding: EdgeInsets.only(
+                    top: 4.h,
+                    left: 16.w,
+                    right: 16.w,
+                  ),
                   child: Text(
                     note.title,
                     style: semiBold.copyWith(
@@ -693,110 +582,89 @@ class NoteCard extends StatelessWidget {
                   ),
                 ),
 
-                // Note content preview
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 16.w,
-                  ),
-                  child: Text(
-                    note.content,
-                    style: regular.copyWith(
-                      fontSize: 14.sp,
-                      color: AppColors.grayTextColor,
-                      height: 1.3,
+                // Tags
+                if (note.tags.isNotEmpty)
+                  Padding(
+                    padding: EdgeInsets.only(
+                      top: 8.h,
+                      left: 16.w,
+                      right: 16.w,
                     ),
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-
-                const Spacer(),
-
-                // Tags and date
-                Padding(
-                  padding: EdgeInsets.all(16.w),
-                  child: Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
-                    children: [
-                      // Display up to 2 tags
-                      if (note.tags.isNotEmpty)
-                        SizedBox(
-                          height: 28.h,
-                          child: ListView.builder(
-                            scrollDirection:
-                                Axis.horizontal,
-                            itemCount:
-                                note.tags.length > 2
-                                    ? 2
-                                    : note.tags.length,
-                            itemBuilder: (context, index) {
-                              return Container(
-                                margin: EdgeInsets.only(
-                                  right: 6.w,
-                                ),
-                                padding:
-                                    EdgeInsets.symmetric(
-                                      horizontal: 8.w,
-                                      vertical: 4.h,
+                    child: SizedBox(
+                      height: 26.h,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount:
+                            note.tags.length > 2
+                                ? 2
+                                : note.tags.length,
+                        itemBuilder: (context, index) {
+                          return Container(
+                            margin: EdgeInsets.only(
+                              right: 6.w,
+                            ),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 8.w,
+                              vertical: 4.h,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Color(0xFF1f1f1f),
+                              borderRadius:
+                                  BorderRadius.circular(
+                                    12.r,
+                                  ),
+                            ),
+                            child: Row(
+                              mainAxisSize:
+                                  MainAxisSize.min,
+                              children: [
+                                Text(
+                                  note.tags[index],
+                                  style: medium.copyWith(
+                                    fontSize: 11.sp,
+                                    color: Color(
+                                      0xffffffff,
                                     ),
-                                decoration: BoxDecoration(
-                                  color: Color(
-                                    0xFFFED4E9,
-                                  ), // Only pink for tags as requested
-                                  borderRadius:
-                                      BorderRadius.circular(
-                                        12.r,
-                                      ),
+                                  ),
                                 ),
-                                child: Row(
-                                  mainAxisSize:
-                                      MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      note.tags[index],
-                                      style: medium
-                                          .copyWith(
-                                            fontSize: 11.sp,
-                                            color: Color(
-                                              0xFFB86684,
-                                            ),
-                                          ),
+                                if (index == 1 &&
+                                    note.tags.length > 2)
+                                  Text(
+                                    " +${note.tags.length - 2}",
+                                    style: medium.copyWith(
+                                      fontSize: 11.sp,
+                                      color: Color(
+                                        0xffffffff,
+                                      ),
                                     ),
-                                    if (index == 1 &&
-                                        note.tags.length >
-                                            2)
-                                      Text(
-                                        " +${note.tags.length - 2}",
-                                        style: medium
-                                            .copyWith(
-                                              fontSize:
-                                                  11.sp,
-                                              color: Color(
-                                                0xFFB86684,
-                                              ),
-                                            ),
-                                      ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-
-                      SizedBox(height: 8.h),
-
-                      // Last modified date
-                      Text(
-                        DateFormat(
-                          'dd MMM yyyy',
-                        ).format(note.lastModified),
-                        style: regular.copyWith(
-                          fontSize: 12.sp,
-                          color: AppColors.grayTextColor,
-                        ),
+                                  ),
+                              ],
+                            ),
+                          );
+                        },
                       ),
-                    ],
+                    ),
+                  ),
+
+                // Note content preview
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      top: 8.h,
+                      left: 16.w,
+                      right: 16.w,
+                      bottom: 16.h,
+                    ),
+                    child: Text(
+                      note.content,
+                      style: regular.copyWith(
+                        fontSize: 14.sp,
+                        color: AppColors.grayTextColor,
+                        height: 1.3,
+                      ),
+                      maxLines: 4,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ),
               ],

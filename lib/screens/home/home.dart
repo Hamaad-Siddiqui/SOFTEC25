@@ -838,7 +838,7 @@ class _HomeScreenState extends State<HomeScreen>
                                   ),
                                   decoration: BoxDecoration(
                                     color: Color(
-                                      0xFFF0F4F8,
+                                      0xFFf6f6f6,
                                     ),
                                     shape: BoxShape.circle,
                                   ),
