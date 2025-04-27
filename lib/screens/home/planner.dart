@@ -19,10 +19,15 @@ class PlannerScreen extends StatefulWidget {
       _PlannerScreenState();
 }
 
-class _PlannerScreenState extends State<PlannerScreen> {
+class _PlannerScreenState extends State<PlannerScreen>
+    with SingleTickerProviderStateMixin {
   late DateTime _selectedDate;
   late List<DateTime> _monthDays;
+  late List<DateTime>
+  _weekDates; // For horizontal date selector
   bool _showMonthView = false;
+  late AnimationController _animationController;
+  late Animation<double> _animation;
 
   // Initialize with some dummy tasks and reminders
   late List<dynamic>
@@ -32,8 +37,22 @@ class _PlannerScreenState extends State<PlannerScreen> {
   void initState() {
     super.initState();
 
+    // Initialize animation controller for date selection
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+
+    _animation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    );
+
     // Set today as the selected date
     _selectedDate = DateTime.now();
+
+    // Generate week dates (3 days before today + today + 3 days after)
+    _generateWeekDates();
 
     // Generate days for the current month
     _generateMonthDays();
@@ -48,6 +67,19 @@ class _PlannerScreenState extends State<PlannerScreen> {
       );
       bloc.fetchReminders();
     });
+  }
+
+  // Generate week dates for horizontal date picker
+  void _generateWeekDates() {
+    final now = DateTime.now();
+    _weekDates = List.generate(
+      7,
+      (index) => DateTime(
+        now.year,
+        now.month,
+        now.day - 3 + index,
+      ),
+    );
   }
 
   // Generate days for the current month
@@ -354,6 +386,51 @@ class _PlannerScreenState extends State<PlannerScreen> {
     });
   }
 
+  // Check if date is selected
+  bool _isSelected(DateTime date) {
+    return date.year == _selectedDate.year &&
+        date.month == _selectedDate.month &&
+        date.day == _selectedDate.day;
+  }
+
+  // Get color for date
+  Color _getDateColor(DateTime date, bool isSelected) {
+    if (isSelected) {
+      return AppColors.secondaryColor;
+    } else if (_isToday(date)) {
+      return Color(0xffcfe6ed);
+    } else {
+      return Colors.transparent;
+    }
+  }
+
+  // Handle date selection from horizontal date picker
+  void _selectDate(DateTime date) {
+    if (_isSelected(date)) return;
+
+    setState(() {
+      _selectedDate = date;
+      _animationController.reset();
+      _animationController.forward();
+
+      // Update _weekDates if the selected date is outside the current range
+      if (date.isBefore(_weekDates.first) ||
+          date.isAfter(_weekDates.last)) {
+        _weekDates = List.generate(
+          7,
+          (index) => DateTime(
+            date.year,
+            date.month,
+            date.day - 3 + index,
+          ),
+        );
+      }
+
+      // Fetch items for the newly selected date
+      _fetchItemsForSelectedDate();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -373,95 +450,253 @@ class _PlannerScreenState extends State<PlannerScreen> {
 
   // Build the header with date selector
   Widget _buildHeader() {
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: 16.w,
-        vertical: 16.h,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 5,
-            offset: const Offset(0, 2),
+    return Column(
+      children: [
+        Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: 16.w,
+            vertical: 16.h,
           ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
+          decoration: BoxDecoration(color: Colors.white),
+          child: Row(
             children: [
-              IconButton(
-                icon: SvgPicture.asset(
-                  'assets/svg/back.svg',
-                  height: 24.h,
-                  width: 24.h,
+              // Month/Year selector badge
+              GestureDetector(
+                onTap: _toggleMonthView,
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 8.h,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Color(0xFFcfe6ed),
+                    borderRadius: BorderRadius.circular(
+                      20.r,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        DateFormat.yMMMM().format(
+                          _selectedDate,
+                        ),
+                        style: semiBold.copyWith(
+                          fontSize: 16.sp,
+                          color: AppColors.secondaryColor,
+                        ),
+                      ),
+                      SizedBox(width: 4.w),
+                      Icon(
+                        _showMonthView
+                            ? Icons
+                                .keyboard_arrow_up_rounded
+                            : Icons
+                                .keyboard_arrow_down_rounded,
+                        color: AppColors.secondaryColor,
+                      ),
+                    ],
+                  ),
                 ),
-                onPressed: () => Navigator.pop(context),
               ),
               const Spacer(),
-              Text(
-                'Planner',
-                style: semiBold.copyWith(
-                  fontSize: 20.sp,
-                  color: AppColors.darkTextColor,
-                ),
+              // Navigation arrows
+              Row(
+                children: [
+                  // Previous day arrow
+                  IconButton(
+                    icon: Icon(
+                      Icons.arrow_back_ios,
+                      color: Colors.black,
+                      size: 18.h,
+                    ),
+                    padding: EdgeInsets.all(4.w),
+                    constraints: BoxConstraints(),
+                    onPressed: () {
+                      setState(() {
+                        _selectedDate = _selectedDate
+                            .subtract(Duration(days: 1));
+                        // Update week dates if we moved outside the current range
+                        if (_selectedDate.isBefore(
+                          _weekDates.first,
+                        )) {
+                          _weekDates = List.generate(
+                            7,
+                            (index) => DateTime(
+                              _selectedDate.year,
+                              _selectedDate.month,
+                              _selectedDate.day - 3 + index,
+                            ),
+                          );
+                        }
+                        _fetchItemsForSelectedDate();
+                        _animationController.reset();
+                        _animationController.forward();
+                      });
+                    },
+                  ),
+                  SizedBox(width: 4.w),
+                  // Next day arrow
+                  IconButton(
+                    icon: Icon(
+                      Icons.arrow_forward_ios,
+                      color: Colors.black,
+                      size: 18.h,
+                    ),
+                    padding: EdgeInsets.all(4.w),
+                    constraints: BoxConstraints(),
+                    onPressed: () {
+                      setState(() {
+                        _selectedDate = _selectedDate.add(
+                          Duration(days: 1),
+                        );
+                        // Update week dates if we moved outside the current range
+                        if (_selectedDate.isAfter(
+                          _weekDates.last,
+                        )) {
+                          _weekDates = List.generate(
+                            7,
+                            (index) => DateTime(
+                              _selectedDate.year,
+                              _selectedDate.month,
+                              _selectedDate.day - 3 + index,
+                            ),
+                          );
+                        }
+                        _fetchItemsForSelectedDate();
+                        _animationController.reset();
+                        _animationController.forward();
+                      });
+                    },
+                  ),
+                ],
               ),
-              const Spacer(),
-              IconButton(
-                icon: Icon(
-                  Icons.add_alert_outlined,
-                  color: AppColors.secondaryColor,
-                  size: 24.h,
-                ),
-                onPressed: () {
+              SizedBox(width: 12.w),
+              // Add reminder button
+              GestureDetector(
+                onTap: () {
                   Navigator.pushNamed(
                     context,
                     AIScreen.routeName,
                     arguments: {'type': 'reminder'},
                   );
                 },
+                child: Container(
+                  height: 36.h,
+                  width: 36.h,
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(
+                      8.r,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.add,
+                    color: Colors.white,
+                    size: 24.h,
+                  ),
+                ),
               ),
             ],
           ),
-          SizedBox(height: 8.h),
-          GestureDetector(
-            onTap: _toggleMonthView,
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: 16.w,
-                vertical: 8.h,
-              ),
-              decoration: BoxDecoration(
-                color: Color(0xFFcfe6ed),
-                borderRadius: BorderRadius.circular(20.r),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    DateFormat.yMMMM().format(
-                      _selectedDate,
-                    ),
-                    style: semiBold.copyWith(
-                      fontSize: 16.sp,
-                      color: AppColors.secondaryColor,
-                    ),
-                  ),
-                  SizedBox(width: 4.w),
-                  Icon(
-                    _showMonthView
-                        ? Icons.keyboard_arrow_up_rounded
-                        : Icons.keyboard_arrow_down_rounded,
-                    color: AppColors.secondaryColor,
-                  ),
-                ],
-              ),
-            ),
+        ),
+
+        // Date Selector Calendar
+        Container(
+          height: 86.h,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12.r),
           ),
-        ],
-      ),
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: _weekDates.length,
+            padding: EdgeInsets.symmetric(horizontal: 10.w),
+            itemBuilder: (context, index) {
+              final date = _weekDates[index];
+              final isSelected = _isSelected(date);
+              final isToday = _isToday(date);
+
+              return GestureDetector(
+                onTap: () => _selectDate(date),
+                child: AnimatedBuilder(
+                  animation: _animation,
+                  builder: (context, child) {
+                    final animatedScale =
+                        isSelected
+                            ? Tween<double>(
+                              begin: 1.0,
+                              end: 1.05,
+                            ).evaluate(_animation)
+                            : 1.0;
+
+                    return Transform.scale(
+                      scale: animatedScale,
+                      child: Container(
+                        width: 48.w,
+                        margin: EdgeInsets.symmetric(
+                          horizontal: 5.w,
+                          vertical: 10.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _getDateColor(
+                            date,
+                            isSelected,
+                          ),
+                          borderRadius:
+                              BorderRadius.circular(12.r),
+                          border:
+                              !isSelected && !isToday
+                                  ? Border.all(
+                                    color: Colors.grey
+                                        .withOpacity(0.2),
+                                    width: 1,
+                                  )
+                                  : null,
+                        ),
+                        child: Column(
+                          mainAxisAlignment:
+                              MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              DateFormat('EEE')
+                                  .format(date)
+                                  .substring(0, 3),
+                              style: medium.copyWith(
+                                fontSize: 12.sp,
+                                color:
+                                    isSelected
+                                        ? Colors.white
+                                        : AppColors
+                                            .secondaryColor
+                                            .withOpacity(
+                                              0.8,
+                                            ),
+                              ),
+                            ),
+                            SizedBox(height: 4.h),
+                            Text(
+                              date.day.toString(),
+                              style: semiBold.copyWith(
+                                fontSize: 16.sp,
+                                color:
+                                    isSelected
+                                        ? Colors.white
+                                        : AppColors
+                                            .secondaryColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -658,16 +893,7 @@ class _PlannerScreenState extends State<PlannerScreen> {
         ),
         children: [
           // Selected date header
-          Text(
-            DateFormat(
-              'EEEE, MMMM d',
-            ).format(_selectedDate),
-            style: semiBold.copyWith(
-              fontSize: 18.sp,
-              color: AppColors.darkTextColor,
-            ),
-          ),
-          SizedBox(height: 16.h),
+          SizedBox(height: 6.h),
 
           // Full day items section
           if (fullDayItems.isNotEmpty) ...[
