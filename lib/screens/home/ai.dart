@@ -5,11 +5,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:softec25/bloc/main_bloc.dart';
-import 'package:softec25/models/reminder_model.dart';
 import 'package:softec25/models/task_model.dart';
-import 'package:softec25/screens/home/planner.dart';
 import 'package:softec25/styles.dart';
-import 'package:softec25/utils/utils.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:video_player/video_player.dart';
@@ -186,6 +183,15 @@ class _AIScreenState extends State<AIScreen> {
         final reminder = await mainBloc
             .createReminderFromAI(response);
 
+        // Save the reminder to Firestore
+        // Use the user's ID to save the reminder
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(mainBloc.auth.currentUser!.uid)
+            .collection('reminders')
+            .doc(reminder.id)
+            .set(reminder.toFirestore());
+
         // Update dialog to show success
         if (mounted) {
           Navigator.of(
@@ -203,9 +209,7 @@ class _AIScreenState extends State<AIScreen> {
             Navigator.of(context).pop();
 
             // Navigate to planner screen if not already there
-            Navigator.of(
-              context,
-            ).pushReplacementNamed(PlannerScreen.routeName);
+            Navigator.of(context).pop();
           }
         });
       } else {

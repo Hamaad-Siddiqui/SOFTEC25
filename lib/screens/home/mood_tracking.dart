@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:softec25/bloc/main_bloc.dart';
 import 'package:softec25/models/mood_model.dart';
 import 'package:softec25/styles.dart';
+import 'package:softec25/utils/utils.dart';
 
 class MoodTrackingScreen extends StatefulWidget {
   const MoodTrackingScreen({super.key});
@@ -349,23 +350,13 @@ class _MoodTrackingScreenState
 
       mainBloc.notifyAll();
 
-      // Close processing dialog and show success
+      // Close processing dialog and show affirmation dialog
       if (mounted) {
         Navigator.of(
           context,
         ).pop(); // Close processing dialog
-        _showSuccessDialog('Mood saved successfully!');
+        _showAffirmationDialog(affirmation);
       }
-
-      // Return to previous screen after delay
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted && Navigator.of(context).canPop()) {
-          Navigator.of(context).pop();
-        }
-        if (mounted && Navigator.of(context).canPop()) {
-          Navigator.of(context).pop();
-        }
-      });
     } catch (e) {
       // Handle error
       if (mounted && Navigator.of(context).canPop()) {
@@ -388,32 +379,16 @@ class _MoodTrackingScreenState
     String userId,
     MoodType moodType,
   ) async {
-    // This would typically fetch mood history and call an AI service
-    // For now, we'll return a placeholder affirmation based on the mood
-
     try {
-      // In a real implementation, you would:
-      // 1. Fetch recent mood history from Firestore
-      // 2. Call an AI service using mainBloc to generate a personalized affirmation
-      // 3. Return the generated affirmation
+      final mb = context.read<MainBloc>();
+      final res = await mb.dailyAffirmation(
+        moodType.name,
+        _notesController.text.trim(),
+      );
 
-      // Example placeholder affirmations based on mood
-      switch (moodType) {
-        case MoodType.angry:
-          return "It's okay to feel angry. Take deep breaths and remember tomorrow is a new day.";
-        case MoodType.sad:
-          return "Your feelings are valid. Be gentle with yourself today.";
-        case MoodType.neutral:
-          return "You're doing great. Every day is a chance to grow.";
-        case MoodType.happy:
-          return "Your positive energy is contagious. Keep spreading joy!";
-        case MoodType.excited:
-          return "Channel this excitement into something meaningful. You're unstoppable!";
-        default:
-          return "Every feeling is temporary. Tomorrow brings new opportunities.";
-      }
+      return res['affirmation'] ?? "You are doing great!";
     } catch (e) {
-      print('Error generating affirmation: $e');
+      warn('Error generating affirmation: $e');
       return "Take a moment to breathe and be present."; // Fallback affirmation
     }
   }
@@ -535,6 +510,79 @@ class _MoodTrackingScreenState
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'OK',
+                style: medium.copyWith(
+                  fontSize: 16.sp,
+                  color: AppColors.secondaryColor,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Show dialog with the user's affirmation
+  void _showAffirmationDialog(String affirmation) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.r),
+          ),
+          title: Text(
+            'Your Daily Affirmation',
+            textAlign: TextAlign.center,
+            style: semiBold.copyWith(
+              fontSize: 18.sp,
+              color: AppColors.darkTextColor,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: EdgeInsets.all(16.h),
+                decoration: BoxDecoration(
+                  color: AppColors.secondaryColor
+                      .withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: Text(
+                  '"$affirmation"',
+                  textAlign: TextAlign.center,
+                  style: medium.copyWith(
+                    fontSize: 16.sp,
+                    color: AppColors.darkTextColor,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ),
+              SizedBox(height: 20.h),
+              Text(
+                'Your mood has been saved successfully!',
+                textAlign: TextAlign.center,
+                style: regular.copyWith(
+                  fontSize: 14.sp,
+                  color: AppColors.grayTextColor,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                // Close dialog and then current screen
+                Navigator.of(context).pop(); // Close dialog
+                Navigator.of(
+                  context,
+                ).pop(); // Return to previous screen
+              },
               child: Text(
                 'OK',
                 style: medium.copyWith(

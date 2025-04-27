@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -11,6 +12,7 @@ import 'package:softec25/screens/home/mood_tracking.dart';
 import 'package:softec25/screens/home/notification.dart';
 import 'package:softec25/screens/operations/notes.dart';
 import 'package:softec25/styles.dart';
+import 'package:softec25/utils/utils.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -29,10 +31,16 @@ class _HomeScreenState extends State<HomeScreen>
   late AnimationController _animationController;
   late Animation<double> _animation;
 
-  // Create dummy tasks for different days
-  late List<TaskModel> allTasks;
+  List<TaskModel> allTasks = [];
   // Filtered tasks for the selected date
   late List<TaskModel> filteredTasks;
+
+  late Stream<QuerySnapshot<Map<String, dynamic>>>
+  tasksStream;
+
+  // Add a stream for notes
+  late Stream<QuerySnapshot<Map<String, dynamic>>>
+  notesStream;
 
   @override
   void initState() {
@@ -55,277 +63,57 @@ class _HomeScreenState extends State<HomeScreen>
     // Generate week dates (3 days before today + today + 3 days after)
     _generateWeekDates();
 
-    // Initialize dummy tasks with SubTaskModel objects for different days
-    _initializeDummyTasks();
+    final mb = context.read<MainBloc>();
+
+    // Initialize tasks stream
+    tasksStream =
+        mb.db
+            .collection('users')
+            .doc(mb.user!.uid)
+            .collection('tasks')
+            // 3 days before today and 3 days after
+            .where(
+              'dueDate',
+              isGreaterThanOrEqualTo: DateTime(
+                now.year,
+                now.month,
+                now.day - 3,
+              ),
+            )
+            .where(
+              'dueDate',
+              isLessThanOrEqualTo: DateTime(
+                now.year,
+                now.month,
+                now.day + 3,
+              ),
+            )
+            .snapshots();
+
+    // Initialize notes stream
+    notesStream =
+        mb.db
+            .collection('users')
+            .doc(mb.user!.uid)
+            .collection('notes')
+            .orderBy('lastModified', descending: true)
+            .snapshots();
 
     // Filter tasks for the selected date (initially today)
     _filterTasksByDate();
 
-    // Initialize notes and fetch today's mood
+    // Fetch today's mood
     final bloc = Provider.of<MainBloc>(
       context,
       listen: false,
     );
-    bloc.fetchNotes();
+    bloc.fetchTodayMood();
   }
 
   // Initialize tasks for different days
-  void _initializeDummyTasks() {
-    final now = DateTime.now();
-
-    allTasks = [
-      // Today's tasks
-      TaskModel(
-        id: '1',
-        title: 'Email back Mrs James',
-        description:
-            'For the new intern we have next week from Alex Carter, a marketing student from Brookfield University. Confirm their arrival time and make sure the orientation package is prepared. Also, check if they need any accommodation assistance during their stay.',
-        dueDate: DateTime(
-          now.year,
-          now.month,
-          now.day,
-          now.hour + 2,
-        ),
-        category: 'Academics',
-        createdAt: DateTime(
-          now.year,
-          now.month,
-          now.day,
-        ).subtract(const Duration(days: 1)),
-        subtasks: [
-          SubTaskModel(task: 'Review email contents'),
-          SubTaskModel(task: 'Check attachments'),
-        ],
-      ),
-      TaskModel(
-        id: '2',
-        title: 'Check project report',
-        description:
-            'Review the quarterly report before sending it to the department. Make sure all figures are accurate and up to date.',
-        dueDate: DateTime(
-          now.year,
-          now.month,
-          now.day,
-          now.hour + 4,
-        ),
-        category: 'Work',
-        createdAt: DateTime(
-          now.year,
-          now.month,
-          now.day,
-        ).subtract(const Duration(days: 1)),
-      ),
-      TaskModel(
-        id: '3',
-        title: 'Schedule team meeting',
-        description:
-            'Set up the weekly progress meeting with the development team. Prepare agenda and send calendar invites to all team members.',
-        dueDate: DateTime(
-          now.year,
-          now.month,
-          now.day,
-          now.hour + 6,
-        ),
-        category: 'Academics',
-        createdAt: DateTime(
-          now.year,
-          now.month,
-          now.day,
-        ).subtract(const Duration(days: 1)),
-        subtasks: [
-          SubTaskModel(task: 'Create meeting agenda'),
-          SubTaskModel(task: 'Book conference room'),
-          SubTaskModel(task: 'Send calendar invites'),
-        ],
-      ),
-
-      // Tomorrow's tasks
-      TaskModel(
-        id: '4',
-        title: 'Doctor Appointment',
-        description:
-            'Annual checkup at Dr. Smith\'s clinic. Bring health insurance card and list of current medications.',
-        dueDate: DateTime(
-          now.year,
-          now.month,
-          now.day + 1,
-          10,
-          30,
-        ),
-        category: 'Personal',
-        createdAt: DateTime(
-          now.year,
-          now.month,
-          now.day - 2,
-        ),
-        subtasks: [
-          SubTaskModel(task: 'Prepare medication list'),
-          SubTaskModel(
-            task: 'Collect previous medical reports',
-          ),
-        ],
-      ),
-      TaskModel(
-        id: '5',
-        title: 'Project Presentation',
-        description:
-            'Present the new feature implementation to the stakeholders. Include performance metrics and user feedback.',
-        dueDate: DateTime(
-          now.year,
-          now.month,
-          now.day + 1,
-          14,
-          0,
-        ),
-        category: 'Work',
-        createdAt: DateTime(
-          now.year,
-          now.month,
-          now.day - 1,
-        ),
-        subtasks: [
-          SubTaskModel(task: 'Finalize slides'),
-          SubTaskModel(task: 'Practice presentation'),
-          SubTaskModel(task: 'Prepare for Q&A'),
-        ],
-      ),
-
-      // Yesterday's tasks
-      TaskModel(
-        id: '6',
-        title: 'Gym Workout',
-        description:
-            'Cardio and strength training session at Fitness First. Focus on upper body and core exercises.',
-        dueDate: DateTime(
-          now.year,
-          now.month,
-          now.day - 1,
-          18,
-          0,
-        ),
-        category: 'Health',
-        createdAt: DateTime(
-          now.year,
-          now.month,
-          now.day - 2,
-        ),
-        isCompleted: true,
-      ),
-      TaskModel(
-        id: '7',
-        title: 'Grocery Shopping',
-        description:
-            'Pick up essentials from Whole Foods. Don\'t forget milk, eggs, bread, and fresh vegetables.',
-        dueDate: DateTime(
-          now.year,
-          now.month,
-          now.day - 1,
-          20,
-          0,
-        ),
-        category: 'Personal',
-        createdAt: DateTime(
-          now.year,
-          now.month,
-          now.day - 2,
-        ),
-        isCompleted: true,
-        subtasks: [
-          SubTaskModel(
-            task: 'Check pantry inventory',
-            isCompleted: true,
-          ),
-          SubTaskModel(
-            task: 'Make shopping list',
-            isCompleted: true,
-          ),
-          SubTaskModel(
-            task: 'Check for discounts',
-            isCompleted: true,
-          ),
-        ],
-      ),
-
-      // Two days ago
-      TaskModel(
-        id: '8',
-        title: 'Code Review',
-        description:
-            'Review pull request #342 from the development team. Focus on performance optimizations and code quality.',
-        dueDate: DateTime(
-          now.year,
-          now.month,
-          now.day - 2,
-          15,
-          0,
-        ),
-        category: 'Work',
-        createdAt: DateTime(
-          now.year,
-          now.month,
-          now.day - 3,
-        ),
-        isCompleted: true,
-      ),
-
-      // Day after tomorrow
-      TaskModel(
-        id: '9',
-        title: 'Team Lunch',
-        description:
-            'Monthly team bonding lunch at Italian Bistro. Reservation made for 12:30 PM, confirm attendance with all team members.',
-        dueDate: DateTime(
-          now.year,
-          now.month,
-          now.day + 2,
-          12,
-          30,
-        ),
-        category: 'Social',
-        createdAt: DateTime(now.year, now.month, now.day),
-        subtasks: [
-          SubTaskModel(task: 'Confirm reservation'),
-          SubTaskModel(task: 'Send reminder to team'),
-        ],
-      ),
-      TaskModel(
-        id: '10',
-        title: 'Contract Review',
-        description:
-            'Review and sign the new client contract. Check payment terms and delivery timeline before signing.',
-        dueDate: DateTime(
-          now.year,
-          now.month,
-          now.day + 2,
-          16,
-          0,
-        ),
-        category: 'Work',
-        createdAt: DateTime(now.year, now.month, now.day),
-      ),
-
-      // Three days from now
-      TaskModel(
-        id: '11',
-        title: 'Website Update',
-        description:
-            'Deploy the new homepage design and test all functionalities. Make sure all links are working and analytics is properly set up.',
-        dueDate: DateTime(
-          now.year,
-          now.month,
-          now.day + 3,
-          11,
-        ),
-        category: 'Work',
-        createdAt: DateTime(now.year, now.month, now.day),
-        subtasks: [
-          SubTaskModel(task: 'Final design review'),
-          SubTaskModel(task: 'Cross-browser testing'),
-          SubTaskModel(task: 'Mobile responsiveness check'),
-        ],
-      ),
-    ];
-  }
+  // void _initializeDummyTasks() {
+  //   final now = DateTime.now();
+  // }
 
   void _generateWeekDates() {
     final now = DateTime.now();
@@ -441,9 +229,12 @@ class _HomeScreenState extends State<HomeScreen>
           0.5,
         ); // Light red for incomplete tasks
       } else {
-        return Color(0xFFF5EFD1).withOpacity(
+        return Color(0xFFF5D1D1).withOpacity(
           0.5,
-        ); // Light yellow for mixed completion
+        ); // Light red for incomplete tasks
+        // return Color(0xFFF5EFD1).withOpacity(
+        //   0.5,
+        // ); // Light yellow for mixed completion
       }
     }
 
@@ -498,6 +289,22 @@ class _HomeScreenState extends State<HomeScreen>
       default:
         return 'neutral.svg';
     }
+  }
+
+  // Helper method to check if subtasks have changed between updates
+  bool _haveSubtasksChanged(
+    List<SubTaskModel> previous,
+    List<SubTaskModel> current,
+  ) {
+    if (previous.length != current.length) return true;
+
+    for (int i = 0; i < previous.length; i++) {
+      if (previous[i].isCompleted !=
+          current[i].isCompleted) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @override
@@ -566,7 +373,9 @@ class _HomeScreenState extends State<HomeScreen>
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const NotificationScreen(),
+                              builder:
+                                  (context) =>
+                                      const NotificationScreen(),
                             ),
                           );
                         },
@@ -864,81 +673,165 @@ class _HomeScreenState extends State<HomeScreen>
                         12.r,
                       ),
                     ),
-                    child: Column(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            SvgPicture.asset(
-                              'assets/svg/calendar2.svg',
-                              height: 16.h,
-                              width: 16.w,
-                              colorFilter: ColorFilter.mode(
-                                AppColors.secondaryColor
-                                    .withOpacity(0.9),
-                                BlendMode.srcIn,
+                    child: StreamBuilder(
+                      stream: tasksStream,
+                      builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                          warn(
+                            'Error fetching tasks: ${snapshot.error}',
+                          );
+                          return Center(
+                            child: Text(
+                              'Error loading tasks e: ${snapshot.error}',
+                              style: medium.copyWith(
+                                fontSize: 16.sp,
+                                color:
+                                    AppColors.darkTextColor,
                               ),
                             ),
-                            SizedBox(width: 6.w),
+                          );
+                        }
+
+                        if (snapshot.data == null) {
+                          return Center(
+                            child: CircularProgressIndicator(
+                              valueColor:
+                                  AlwaysStoppedAnimation<
+                                    Color
+                                  >(
+                                    AppColors
+                                        .secondaryColor,
+                                  ),
+                            ),
+                          );
+                        }
+
+                        // Save the current length for comparison
+                        final prevTasksLength =
+                            allTasks.length;
+
+                        // Clear previous tasks
+                        allTasks.clear();
+
+                        // Add new tasks to the list
+                        final tasks =
+                            snapshot.data!.docs.map((doc) {
+                              // doc.data()['id'] = doc.id;
+                              var data = doc.data();
+                              data['id'] = doc.id;
+                              return TaskModel.fromMap(
+                                data,
+                              );
+                            }).toList();
+                        allTasks.addAll(tasks);
+
+                        console(
+                          'Fetched ${allTasks.length} tasks',
+                        );
+
+                        // Only filter tasks in the current build cycle
+                        _filterTasksByDate();
+
+                        // Only schedule a setState if the number of tasks changed
+                        // This prevents infinite rebuild loops
+                        if (prevTasksLength !=
+                                allTasks.length &&
+                            mounted) {
+                          // Use a microtask instead of post-frame callback to avoid rebuild loops
+                          // This will run after the current build cycle is complete
+                          Future.microtask(() {
+                            if (mounted) {
+                              setState(() {
+                                // Just trigger a rebuild - data is already updated
+                              });
+                            }
+                          });
+                        }
+
+                        return Column(
+                          crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                SvgPicture.asset(
+                                  'assets/svg/calendar2.svg',
+                                  height: 16.h,
+                                  width: 16.w,
+                                  colorFilter:
+                                      ColorFilter.mode(
+                                        AppColors
+                                            .secondaryColor
+                                            .withOpacity(
+                                              0.9,
+                                            ),
+                                        BlendMode.srcIn,
+                                      ),
+                                ),
+                                SizedBox(width: 6.w),
+                                Text(
+                                  DateFormat(
+                                    'EEEE, d\'th\' MMMM',
+                                  ).format(_selectedDate),
+                                  style: medium.copyWith(
+                                    height: 1,
+                                    fontSize: 13.sp,
+                                    color: AppColors
+                                        .secondaryColor
+                                        .withOpacity(0.9),
+                                  ),
+                                ),
+                                Spacer(),
+                              ],
+                            ),
+                            SizedBox(height: 17.h),
                             Text(
-                              DateFormat(
-                                'EEEE, d\'th\' MMMM',
-                              ).format(_selectedDate),
-                              style: medium.copyWith(
-                                height: 1,
-                                fontSize: 13.sp,
+                              'You ${_selectedDate.isBefore(DateTime(now.year, now.month, now.day)) ? 'had' : 'have'} ${filteredTasks.where((task) => !task.isCompleted).length}\ntasks left ${_isToday(_selectedDate) ? 'for today' : 'for ${DateFormat('EEEE').format(_selectedDate)}'}',
+                              style: semiBold.copyWith(
+                                fontSize: 18.sp,
                                 color: AppColors
                                     .secondaryColor
                                     .withOpacity(0.9),
+                                height: 1.2,
                               ),
                             ),
-                            Spacer(),
+                            SizedBox(height: 20.h),
+                            ...filteredTasks.map(
+                              (task) => TaskCard(
+                                task: task,
+                                isLast:
+                                    task ==
+                                    filteredTasks.last,
+                                onTaskStatusChanged: (
+                                  isCompleted,
+                                  updatedSubtasks,
+                                ) {
+                                  setState(() {
+                                    final index = allTasks
+                                        .indexWhere(
+                                          (t) =>
+                                              t.id ==
+                                              task.id,
+                                        );
+                                    if (index != -1) {
+                                      final updatedTask =
+                                          task.copyWith(
+                                            isCompleted:
+                                                isCompleted,
+                                            subtasks:
+                                                updatedSubtasks,
+                                          );
+                                      allTasks[index] =
+                                          updatedTask;
+                                    }
+                                    _filterTasksByDate();
+                                  });
+                                },
+                              ),
+                            ),
                           ],
-                        ),
-                        SizedBox(height: 17.h),
-                        Text(
-                          'You ${_selectedDate.isBefore(DateTime(now.year, now.month, now.day)) ? 'had' : 'have'} ${filteredTasks.where((task) => !task.isCompleted).length}\ntasks left ${_isToday(_selectedDate) ? 'for today' : 'for ${DateFormat('EEEE').format(_selectedDate)}'}',
-                          style: semiBold.copyWith(
-                            fontSize: 18.sp,
-                            color: AppColors.secondaryColor
-                                .withOpacity(0.9),
-                            height: 1.2,
-                          ),
-                        ),
-                        SizedBox(height: 20.h),
-                        ...filteredTasks.map(
-                          (task) => TaskCard(
-                            task: task,
-                            isLast:
-                                task == filteredTasks.last,
-                            onTaskStatusChanged: (
-                              isCompleted,
-                              updatedSubtasks,
-                            ) {
-                              setState(() {
-                                final index = allTasks
-                                    .indexWhere(
-                                      (t) =>
-                                          t.id == task.id,
-                                    );
-                                if (index != -1) {
-                                  final updatedTask = task
-                                      .copyWith(
-                                        isCompleted:
-                                            isCompleted,
-                                        subtasks:
-                                            updatedSubtasks,
-                                      );
-                                  allTasks[index] =
-                                      updatedTask;
-                                }
-                                _filterTasksByDate();
-                              });
-                            },
-                          ),
-                        ),
-                      ],
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -967,9 +860,71 @@ class _HomeScreenState extends State<HomeScreen>
                   padding: EdgeInsets.symmetric(
                     horizontal: 16.w,
                   ),
-                  child: Consumer<MainBloc>(
-                    builder: (context, bloc, _) {
-                      if (bloc.notes.isEmpty) {
+                  child: StreamBuilder<
+                    QuerySnapshot<Map<String, dynamic>>
+                  >(
+                    stream: notesStream,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        warn(
+                          'Error fetching notes: ${snapshot.error}',
+                        );
+                        return Center(
+                          child: Text(
+                            'Error loading notes: ${snapshot.error}',
+                            style: medium.copyWith(
+                              fontSize: 16.sp,
+                              color:
+                                  AppColors.darkTextColor,
+                            ),
+                          ),
+                        );
+                      }
+
+                      if (snapshot.connectionState ==
+                          ConnectionState.waiting) {
+                        return Container(
+                          height: 200.h,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius:
+                                BorderRadius.circular(16.r),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black
+                                    .withOpacity(0.03),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              valueColor:
+                                  AlwaysStoppedAnimation<
+                                    Color
+                                  >(
+                                    AppColors
+                                        .secondaryColor,
+                                  ),
+                            ),
+                          ),
+                        );
+                      }
+
+                      // Convert snapshot to list of NoteModel objects
+                      final notes =
+                          snapshot.data?.docs.map((doc) {
+                            final data = doc.data();
+                            // Add the document ID to the data if it's not already there
+                            if (!data.containsKey('id')) {
+                              data['id'] = doc.id;
+                            }
+                            return NoteModel.fromJson(data);
+                          }).toList() ??
+                          [];
+
+                      if (notes.isEmpty) {
                         return Container(
                           height: 200.h,
                           decoration: BoxDecoration(
@@ -1053,9 +1008,9 @@ class _HomeScreenState extends State<HomeScreen>
                               crossAxisSpacing: 16.w,
                               mainAxisSpacing: 16.h,
                             ),
-                        itemCount: bloc.notes.length,
+                        itemCount: notes.length,
                         itemBuilder: (context, index) {
-                          final note = bloc.notes[index];
+                          final note = notes[index];
                           return SizedBox(
                             height: 200.h,
                             child: NoteCard(
@@ -1139,7 +1094,15 @@ class _TaskCardState extends State<TaskCard>
   }
 
   // Handle task completion without animation or expansion
-  void _handleTaskCompletion(bool isCompleted) {
+  void _handleTaskCompletion(bool isCompleted) async {
+    final bloc = Provider.of<MainBloc>(
+      context,
+      listen: false,
+    );
+
+    // Update task completion status in Firebase
+    await bloc.toggleTaskCompletion(widget.task);
+
     // If task is marked complete, automatically mark all subtasks as complete
     if (isCompleted) {
       final updatedSubtasks =
@@ -1160,10 +1123,14 @@ class _TaskCardState extends State<TaskCard>
         });
       }
 
+      // Update UI through callback
       widget.onTaskStatusChanged(true, updatedSubtasks);
       setState(() {
         _subtasks = updatedSubtasks;
       });
+
+      // Update subtasks in Firebase
+      await _updateSubtasksInFirebase(updatedSubtasks);
     } else {
       widget.onTaskStatusChanged(false, _subtasks);
     }
@@ -1172,21 +1139,57 @@ class _TaskCardState extends State<TaskCard>
   void _handleSubtaskCompletion(
     int index,
     bool isCompleted,
-  ) {
+  ) async {
+    // Get the current subtask
+    final currentSubtask = _subtasks[index];
+
+    // Only proceed if the completion status is actually changing
+    if (currentSubtask.isCompleted == isCompleted) return;
+
+    // Create a new list with the updated subtask
+    final updatedSubtasks = List<SubTaskModel>.from(
+      _subtasks,
+    );
+    updatedSubtasks[index] = SubTaskModel(
+      task: _subtasks[index].task,
+      isCompleted: isCompleted,
+    );
+
+    // Update the UI
     setState(() {
-      final updatedSubtasks = List<SubTaskModel>.from(
-        _subtasks,
-      );
-      updatedSubtasks[index] = SubTaskModel(
-        task: _subtasks[index].task,
-        isCompleted: isCompleted,
-      );
       _subtasks = updatedSubtasks;
-      widget.onTaskStatusChanged(
-        widget.task.isCompleted,
-        updatedSubtasks,
-      );
     });
+
+    // Notify parent about changes
+    widget.onTaskStatusChanged(
+      widget.task.isCompleted,
+      updatedSubtasks,
+    );
+
+    // Update the subtask in Firebase
+    final bloc = Provider.of<MainBloc>(
+      context,
+      listen: false,
+    );
+    await bloc.toggleSubtaskCompletion(widget.task, index);
+  }
+
+  // Helper method to update all subtasks in Firebase
+  Future<void> _updateSubtasksInFirebase(
+    List<SubTaskModel> subtasks,
+  ) async {
+    final bloc = Provider.of<MainBloc>(
+      context,
+      listen: false,
+    );
+
+    // Create updated task with new subtasks
+    final updatedTask = widget.task.copyWith(
+      subtasks: subtasks,
+    );
+
+    // Update the entire task
+    await bloc.updateTask(updatedTask);
   }
 
   @override
