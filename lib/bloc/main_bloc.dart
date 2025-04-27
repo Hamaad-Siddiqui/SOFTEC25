@@ -664,4 +664,8 @@ Here is the users reflection: $reflection
       notifyListeners();
     }
   }
+
+  Future<void> notifyAll() async {
+    notifyListeners();
+  }
 }

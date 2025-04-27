@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -320,7 +319,7 @@ class _MoodTrackingScreenState
 
       // Create a document reference
       final moodDocRef =
-          FirebaseFirestore.instance
+          mainBloc.db
               .collection('users')
               .doc(userId)
               .collection('moods')
@@ -349,6 +348,10 @@ class _MoodTrackingScreenState
 
       // Save to Firestore with affirmation already included
       await moodDocRef.set(mood.toMap());
+
+      mainBloc.usersMoodToday = mood;
+
+      mainBloc.notifyAll();
 
       // Close processing dialog and show success
       if (mounted) {
