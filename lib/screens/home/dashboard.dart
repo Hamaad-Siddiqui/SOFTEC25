@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:softec25/bloc/main_bloc.dart';
 import 'package:softec25/screens/home/ai.dart';
 import 'package:softec25/screens/home/home.dart';
+import 'package:softec25/screens/home/planner.dart';
 import 'package:softec25/screens/home/settings.dart';
 import 'package:softec25/screens/operations/notes.dart';
 import 'package:softec25/styles.dart';
@@ -34,13 +35,10 @@ class _DashboardState extends State<Dashboard>
   late AnimationController _navBarController;
   late Animation<Offset> _navBarAnimation;
 
-  // List of dummy screens for the navigation
+  // List of screens for the navigation
   final List<Widget> _screens = [
     HomeScreen(),
-    const DummyScreen(
-      title: 'Calendar',
-      color: Colors.green,
-    ),
+    PlannerScreen(),
     const DummyScreen(
       title: 'Progress',
       color: Colors.orange,
@@ -303,6 +301,13 @@ class _DashboardState extends State<Dashboard>
                                   AppColors.secondaryColor,
                               onTap: () {
                                 _toggleOverlay();
+                                Navigator.pushNamed(
+                                  context,
+                                  AIScreen.routeName,
+                                  arguments: {
+                                    'type': 'reminder',
+                                  },
+                                );
                               },
                             ),
                           ),
