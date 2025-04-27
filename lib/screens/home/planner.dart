@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -29,9 +30,14 @@ class _PlannerScreenState extends State<PlannerScreen>
   late AnimationController _animationController;
   late Animation<double> _animation;
 
-  // Initialize with some dummy tasks and reminders
-  late List<dynamic>
-  _allItems; // Combined tasks and reminders
+  // Firebase streams
+  late Stream<QuerySnapshot<Map<String, dynamic>>>
+  _tasksStream;
+  late Stream<QuerySnapshot<Map<String, dynamic>>>
+  _remindersStream;
+
+  // Combined tasks and reminders
+  late List<dynamic> _allItems = [];
 
   @override
   void initState() {
@@ -57,6 +63,9 @@ class _PlannerScreenState extends State<PlannerScreen>
     // Generate days for the current month
     _generateMonthDays();
 
+    // Setup Firestore streams
+    _setupFirestoreStreams();
+
     // Fetch items for the selected date (initially today)
     _fetchItemsForSelectedDate();
 
@@ -67,6 +76,34 @@ class _PlannerScreenState extends State<PlannerScreen>
       );
       bloc.fetchReminders();
     });
+  }
+
+  // Setup Firestore streams for tasks and reminders
+  void _setupFirestoreStreams() {
+    final bloc = Provider.of<MainBloc>(
+      context,
+      listen: false,
+    );
+
+    if (!bloc.isLoggedIn) return;
+
+    // Stream for tasks
+    _tasksStream =
+        bloc.db
+            .collection('users')
+            .doc(bloc.auth.currentUser!.uid)
+            .collection('tasks')
+            .orderBy('dueDate', descending: false)
+            .snapshots();
+
+    // Stream for reminders
+    _remindersStream =
+        bloc.db
+            .collection('users')
+            .doc(bloc.auth.currentUser!.uid)
+            .collection('reminders')
+            .orderBy('dueDate', descending: false)
+            .snapshots();
   }
 
   // Generate week dates for horizontal date picker
@@ -858,63 +895,156 @@ class _PlannerScreenState extends State<PlannerScreen>
             ? now.hour
             : -1; // To highlight current hour
 
-    // Split items by time category
-    final fullDayItems =
-        _allItems
-            .where(
-              (item) =>
-                  (item is TaskModel &&
-                      item.dueDate.hour == 0 &&
-                      item.dueDate.minute == 0) ||
-                  (item is ReminderModel &&
-                      item.dueDate.hour == 0 &&
-                      item.dueDate.minute == 0),
-            )
-            .toList();
-
-    final timedItems =
-        _allItems
-            .where(
-              (item) =>
-                  (item is TaskModel &&
-                      (item.dueDate.hour != 0 ||
-                          item.dueDate.minute != 0)) ||
-                  (item is ReminderModel &&
-                      (item.dueDate.hour != 0 ||
-                          item.dueDate.minute != 0)),
-            )
-            .toList();
-
     return Expanded(
-      child: ListView(
-        padding: EdgeInsets.symmetric(
-          horizontal: 16.w,
-          vertical: 16.h,
-        ),
-        children: [
-          // Selected date header
-          SizedBox(height: 6.h),
+      // Wrap with Expanded to provide size constraints
+      child: StreamBuilder<
+        QuerySnapshot<Map<String, dynamic>>
+      >(
+        stream: _tasksStream,
+        builder: (context, tasksSnapshot) {
+          return StreamBuilder<
+            QuerySnapshot<Map<String, dynamic>>
+          >(
+            stream: _remindersStream,
+            builder: (context, remindersSnapshot) {
+              if (tasksSnapshot.hasError ||
+                  remindersSnapshot.hasError) {
+                return Center(
+                  child: Text('Error loading data'),
+                );
+              }
 
-          // Full day items section
-          if (fullDayItems.isNotEmpty) ...[
-            _buildSectionHeader('Full Day'),
-            ...fullDayItems.map(
-              (item) => _buildItemCard(item, true),
-            ),
-            SizedBox(height: 16.h),
-          ],
+              if (tasksSnapshot.connectionState ==
+                      ConnectionState.waiting ||
+                  remindersSnapshot.connectionState ==
+                      ConnectionState.waiting) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
 
-          // Time slots with items
-          for (int hour = 0; hour < 24; hour++) ...[
-            if (_hasItemsInHour(timedItems, hour)) ...[
-              _buildTimeSlot(
-                hour,
-                _getItemsForHour(timedItems, hour),
-                isCurrentHour: hour == currentTimeHour,
-              ),
-            ],
-          ],
-        ],
+              // Clear previous items
+              _allItems = [];
+
+              // Process tasks
+              if (tasksSnapshot.hasData) {
+                final tasks =
+                    tasksSnapshot.data!.docs.map((doc) {
+                      Map<String, dynamic> data =
+                          doc.data();
+                      data['id'] = doc.id;
+                      return TaskModel.fromMap(data);
+                    }).toList();
+
+                // Filter tasks for selected date
+                final selectedDateTasks =
+                    tasks.where((task) {
+                      return task.dueDate.year ==
+                              _selectedDate.year &&
+                          task.dueDate.month ==
+                              _selectedDate.month &&
+                          task.dueDate.day ==
+                              _selectedDate.day;
+                    }).toList();
+
+                _allItems.addAll(selectedDateTasks);
+              }
+
+              // Process reminders
+              if (remindersSnapshot.hasData) {
+                final reminders =
+                    remindersSnapshot.data!.docs.map((doc) {
+                      return ReminderModel.fromFirestore(
+                        doc,
+                      );
+                    }).toList();
+
+                // Filter reminders for selected date
+                final selectedDateReminders =
+                    reminders.where((reminder) {
+                      return reminder.dueDate.year ==
+                              _selectedDate.year &&
+                          reminder.dueDate.month ==
+                              _selectedDate.month &&
+                          reminder.dueDate.day ==
+                              _selectedDate.day;
+                    }).toList();
+
+                _allItems.addAll(selectedDateReminders);
+              }
+
+              // If no items are found, use sample data for demonstration
+              if (_allItems.isEmpty &&
+                  _isToday(_selectedDate)) {
+                _generateSampleItems();
+              }
+
+              // Sort items by time
+              _sortItemsByTime();
+
+              // Split items by time category
+              final fullDayItems =
+                  _allItems
+                      .where(
+                        (item) =>
+                            (item is TaskModel &&
+                                item.dueDate.hour == 0 &&
+                                item.dueDate.minute == 0) ||
+                            (item is ReminderModel &&
+                                item.dueDate.hour == 0 &&
+                                item.dueDate.minute == 0),
+                      )
+                      .toList();
+
+              final timedItems =
+                  _allItems
+                      .where(
+                        (item) =>
+                            (item is TaskModel &&
+                                (item.dueDate.hour != 0 ||
+                                    item.dueDate.minute !=
+                                        0)) ||
+                            (item is ReminderModel &&
+                                (item.dueDate.hour != 0 ||
+                                    item.dueDate.minute !=
+                                        0)),
+                      )
+                      .toList();
+
+              return ListView(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 16.w,
+                  vertical: 16.h,
+                ),
+                children: [
+                  // Full day items section
+                  if (fullDayItems.isNotEmpty) ...[
+                    _buildSectionHeader('Full Day'),
+                    ...fullDayItems.map(
+                      (item) => _buildItemCard(item, true),
+                    ),
+                    SizedBox(height: 16.h),
+                  ],
+
+                  // Time slots with items
+                  for (int hour = 0; hour < 24; hour++) ...[
+                    if (_hasItemsInHour(
+                      timedItems,
+                      hour,
+                    )) ...[
+                      _buildTimeSlot(
+                        hour,
+                        _getItemsForHour(timedItems, hour),
+                        isCurrentHour:
+                            hour == currentTimeHour,
+                      ),
+                    ],
+                  ],
+                ],
+              );
+            },
+          );
+        },
       ),
     );
   }
@@ -1252,58 +1382,34 @@ class _PlannerScreenState extends State<PlannerScreen>
   }
 
   // Toggle completion status of an item
-  void _toggleItemCompletion(dynamic item) {
+  void _toggleItemCompletion(dynamic item) async {
     final bloc = Provider.of<MainBloc>(
       context,
       listen: false,
     );
 
-    setState(() {
+    try {
       if (item is TaskModel) {
-        final updatedTask = TaskModel(
-          id: item.id,
-          title: item.title,
-          description: item.description,
-          dueDate: item.dueDate,
-          category: item.category,
-          createdAt: item.createdAt,
-          isCompleted: !item.isCompleted,
-          subtasks: item.subtasks,
-        );
-
-        // In a real app, update in Firestore
-        // bloc.updateTask(updatedTask);
-
-        // For demo, update in the _allItems list
-        final index = _allItems.indexWhere(
-          (i) => i is TaskModel && i.id == item.id,
-        );
-        if (index != -1) {
-          _allItems[index] = updatedTask;
-        }
+        // Update the task completion status in Firebase
+        await bloc.toggleTaskCompletion(item);
       } else if (item is ReminderModel) {
-        final updatedReminder = ReminderModel(
-          id: item.id,
-          title: item.title,
-          description: item.description,
-          dueDate: item.dueDate,
-          category: item.category,
-          createdAt: item.createdAt,
-          isCompleted: !item.isCompleted,
-          userId: item.userId,
-        );
-
-        // Update in Firestore via bloc
-        bloc.updateReminder(updatedReminder);
-
-        // Update in the _allItems list
-        final index = _allItems.indexWhere(
-          (i) => i is ReminderModel && i.id == item.id,
-        );
-        if (index != -1) {
-          _allItems[index] = updatedReminder;
-        }
+        // Update the reminder completion status in Firebase
+        await bloc.toggleReminderCompletion(item);
       }
-    });
+
+      // We don't need to setState or update the UI here because
+      // the StreamBuilder will automatically update when Firebase changes
+    } catch (e) {
+      print('Error toggling completion status: $e');
+      // Show error message to user
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Failed to update item: ${e.toString()}',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 }

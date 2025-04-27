@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -7,6 +8,7 @@ import 'package:softec25/bloc/main_bloc.dart';
 import 'package:softec25/models/notes_model.dart';
 import 'package:softec25/styles.dart';
 import 'package:softec25/utils/utils.dart';
+import 'package:softec25/widgets/dialog.dart';
 import 'package:uuid/uuid.dart';
 
 class NoteDetailScreen extends StatefulWidget {
@@ -99,12 +101,11 @@ class _NoteDetailScreenState extends State<NoteDetailScreen>
   Future<void> _saveNote() async {
     // Validate inputs
     if (_titleController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter a title'),
-        ),
+      showCustomDialog(
+        context,
+        title: 'Error',
+        description: 'Please enter a title',
       );
-      return;
     }
 
     if (_contentController.text.trim().isEmpty) {
@@ -153,8 +154,13 @@ class _NoteDetailScreenState extends State<NoteDetailScreen>
         summary: _summary,
       );
 
-      // Here you would typically save to Firestore
-      // await bloc.db.collection('notes').doc(note.id).set(note.toJson());
+      // Save the note to firestore
+      await bloc.db
+          .collection('users')
+          .doc(bloc.user!.uid)
+          .collection('notes')
+          .doc(note.id)
+          .set(note.toJson(), SetOptions(merge: true));
 
       setState(() {
         _isProcessing = false;
@@ -184,11 +190,11 @@ class _NoteDetailScreenState extends State<NoteDetailScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Hero(
-      tag:
-          widget.note != null
-              ? 'note_${widget.note!.id}'
-              : 'new_note',
+    return SizedBox(
+      // tag:
+      //     widget.note != null
+      //         ? 'note_${widget.note!.id}'
+      //         : 'new_note',
       child: Material(
         type: MaterialType.transparency,
         child: Scaffold(

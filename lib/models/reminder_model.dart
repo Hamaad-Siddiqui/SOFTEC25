@@ -42,6 +42,7 @@ class ReminderModel {
   // Convert ReminderModel to a map for Firestore
   Map<String, dynamic> toFirestore() {
     return {
+      'id': id,
       'title': title,
       'description': description,
       'dueDate': Timestamp.fromDate(dueDate),

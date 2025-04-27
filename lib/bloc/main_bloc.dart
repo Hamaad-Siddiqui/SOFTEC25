@@ -861,57 +861,33 @@ Here is the users reflection: $reflection
     }
   }
 
-  // Create a new reminder
-  Future<ReminderModel> createReminder(
-    ReminderModel reminder,
-  ) async {
-    try {
-      // In a real app, you would save to Firestore here
-      // final docRef = await db
-      //     .collection('users')
-      //     .doc(auth.currentUser!.uid)
-      //     .collection('reminders')
-      //     .add(reminder.toFirestore());
-      //
-      // final createdReminder = reminder.copyWith(id: docRef.id);
+  // // Update an existing reminder
+  // Future<void> updateReminder(
+  //   ReminderModel updatedReminder,
+  // ) async {
+  //   try {
+  //     // In a real app, you would update in Firestore
+  //     // await db
+  //     //     .collection('users')
+  //     //     .doc(auth.currentUser!.uid)
+  //     //     .collection('reminders')
+  //     //     .doc(updatedReminder.id)
+  //     //     .update(updatedReminder.toFirestore());
 
-      // For demo, just add to local list
-      _reminders.add(reminder);
-      notifyListeners();
-      return reminder;
-    } catch (e) {
-      warn('Error creating reminder: $e');
-      throw Exception('Failed to create reminder');
-    }
-  }
+  //     // For demo, update in local list
+  //     final index = _reminders.indexWhere(
+  //       (reminder) => reminder.id == updatedReminder.id,
+  //     );
 
-  // Update an existing reminder
-  Future<void> updateReminder(
-    ReminderModel updatedReminder,
-  ) async {
-    try {
-      // In a real app, you would update in Firestore
-      // await db
-      //     .collection('users')
-      //     .doc(auth.currentUser!.uid)
-      //     .collection('reminders')
-      //     .doc(updatedReminder.id)
-      //     .update(updatedReminder.toFirestore());
-
-      // For demo, update in local list
-      final index = _reminders.indexWhere(
-        (reminder) => reminder.id == updatedReminder.id,
-      );
-
-      if (index != -1) {
-        _reminders[index] = updatedReminder;
-        notifyListeners();
-      }
-    } catch (e) {
-      warn('Error updating reminder: $e');
-      throw Exception('Failed to update reminder');
-    }
-  }
+  //     if (index != -1) {
+  //       _reminders[index] = updatedReminder;
+  //       notifyListeners();
+  //     }
+  //   } catch (e) {
+  //     warn('Error updating reminder: $e');
+  //     throw Exception('Failed to update reminder');
+  //   }
+  // }
 
   // Delete a reminder
   Future<void> deleteReminder(String reminderId) async {
@@ -935,42 +911,122 @@ Here is the users reflection: $reflection
     }
   }
 
-  // Create reminder from AI response
-  Future<ReminderModel> createReminderFromAI(
-    Map<String, dynamic> aiResponse,
-  ) async {
-    final now = DateTime.now();
+  // // Create reminder from AI response
+  // Future<ReminderModel> createReminderFromAI(
+  //   Map<String, dynamic> aiResponse,
+  // ) async {
+  //   final now = DateTime.now();
 
-    // Parse timestamp from the AI response
+  //   // Parse timestamp from the AI response
+  //   DateTime dueDate;
+  //   if (aiResponse.containsKey('timestamp') &&
+  //       aiResponse['timestamp'] != null) {
+  //     final timestamp = int.tryParse(
+  //       aiResponse['timestamp'].toString(),
+  //     );
+  //     if (timestamp != null) {
+  //       dueDate = DateTime.fromMillisecondsSinceEpoch(
+  //         timestamp,
+  //       );
+  //     } else {
+  //       dueDate = now;
+  //     }
+  //   } else {
+  //     dueDate = now;
+  //   }
+
+  //   // Create a new reminder from the AI response
+  //   final reminder = ReminderModel(
+  //     id: DateTime.now().millisecondsSinceEpoch.toString(),
+  //     title: aiResponse['title'] ?? 'Untitled Reminder',
+  //     description: aiResponse['description'] ?? '',
+  //     dueDate: dueDate,
+  //     category: aiResponse['category'] ?? 'Personal',
+  //     createdAt: now,
+  //     userId: auth.currentUser!.uid,
+  //   );
+
+  //   return await createReminder(reminder);
+  // }
+
+  // Create a ReminderModel from AI response
+  ReminderModel createReminderFromAI(
+    Map<String, dynamic> response,
+  ) {
+    // Parse timestamp from string
     DateTime dueDate;
-    if (aiResponse.containsKey('timestamp') &&
-        aiResponse['timestamp'] != null) {
-      final timestamp = int.tryParse(
-        aiResponse['timestamp'].toString(),
+    try {
+      String iso8601 = response['timestamp'].toString();
+      dueDate = DateTime.parse(iso8601);
+    } catch (e) {
+      throw Exception(
+        'Invalid timestamp format: ${response['timestamp']}',
       );
-      if (timestamp != null) {
-        dueDate = DateTime.fromMillisecondsSinceEpoch(
-          timestamp,
-        );
-      } else {
-        dueDate = now;
-      }
-    } else {
-      dueDate = now;
     }
 
-    // Create a new reminder from the AI response
-    final reminder = ReminderModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      title: aiResponse['title'] ?? 'Untitled Reminder',
-      description: aiResponse['description'] ?? '',
+    // Generate a unique ID for the reminder
+    final String reminderId =
+        FirebaseFirestore.instance
+            .collection('users')
+            .doc(auth.currentUser!.uid)
+            .collection('reminders')
+            .doc()
+            .id;
+
+    return ReminderModel(
+      id: reminderId,
+      title: response['title'] ?? '',
+      description: response['description'] ?? '',
       dueDate: dueDate,
-      category: aiResponse['category'] ?? 'Personal',
-      createdAt: now,
+      category: response['category'] ?? 'Personal',
+      createdAt: DateTime.now(),
+      isCompleted: false,
       userId: auth.currentUser!.uid,
     );
+  }
 
-    return await createReminder(reminder);
+  // Update a reminder in Firestore
+  Future<void> updateReminder(
+    ReminderModel reminder,
+  ) async {
+    if (!isLoggedIn) return;
+
+    // Validate reminder has a non-empty ID before attempting to update
+    if (reminder.id.isEmpty) {
+      console(
+        'Error updating reminder: Reminder ID is empty',
+      );
+      return;
+    }
+
+    try {
+      await db
+          .collection('users')
+          .doc(auth.currentUser!.uid)
+          .collection('reminders')
+          .doc(reminder.id)
+          .update(reminder.toFirestore());
+    } catch (e) {
+      console('Error updating reminder: $e');
+    }
+  }
+
+  // Toggle reminder completion status
+  Future<void> toggleReminderCompletion(
+    ReminderModel reminder,
+  ) async {
+    if (!isLoggedIn) return;
+
+    try {
+      await db
+          .collection('users')
+          .doc(auth.currentUser!.uid)
+          .collection('reminders')
+          .doc(reminder.id)
+          .update({'isCompleted': !reminder.isCompleted});
+    } catch (e) {
+      console('Error toggling reminder completion: $e');
+    }
   }
 
   // Get reminders and tasks for a specific date

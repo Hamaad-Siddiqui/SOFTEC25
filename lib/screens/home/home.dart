@@ -38,6 +38,10 @@ class _HomeScreenState extends State<HomeScreen>
   late Stream<QuerySnapshot<Map<String, dynamic>>>
   tasksStream;
 
+  // Add a stream for notes
+  late Stream<QuerySnapshot<Map<String, dynamic>>>
+  notesStream;
+
   @override
   void initState() {
     super.initState();
@@ -59,11 +63,9 @@ class _HomeScreenState extends State<HomeScreen>
     // Generate week dates (3 days before today + today + 3 days after)
     _generateWeekDates();
 
-    // Initialize dummy tasks with SubTaskModel objects for different days
-    // _initializeDummyTasks();
-
     final mb = context.read<MainBloc>();
 
+    // Initialize tasks stream
     tasksStream =
         mb.db
             .collection('users')
@@ -87,15 +89,25 @@ class _HomeScreenState extends State<HomeScreen>
               ),
             )
             .snapshots();
+
+    // Initialize notes stream
+    notesStream =
+        mb.db
+            .collection('users')
+            .doc(mb.user!.uid)
+            .collection('notes')
+            .orderBy('lastModified', descending: true)
+            .snapshots();
+
     // Filter tasks for the selected date (initially today)
     _filterTasksByDate();
 
-    // Initialize notes and fetch today's mood
+    // Fetch today's mood
     final bloc = Provider.of<MainBloc>(
       context,
       listen: false,
     );
-    bloc.fetchNotes();
+    bloc.fetchTodayMood();
   }
 
   // Initialize tasks for different days
@@ -361,7 +373,9 @@ class _HomeScreenState extends State<HomeScreen>
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const NotificationScreen(),
+                              builder:
+                                  (context) =>
+                                      const NotificationScreen(),
                             ),
                           );
                         },
@@ -846,9 +860,71 @@ class _HomeScreenState extends State<HomeScreen>
                   padding: EdgeInsets.symmetric(
                     horizontal: 16.w,
                   ),
-                  child: Consumer<MainBloc>(
-                    builder: (context, bloc, _) {
-                      if (bloc.notes.isEmpty) {
+                  child: StreamBuilder<
+                    QuerySnapshot<Map<String, dynamic>>
+                  >(
+                    stream: notesStream,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        warn(
+                          'Error fetching notes: ${snapshot.error}',
+                        );
+                        return Center(
+                          child: Text(
+                            'Error loading notes: ${snapshot.error}',
+                            style: medium.copyWith(
+                              fontSize: 16.sp,
+                              color:
+                                  AppColors.darkTextColor,
+                            ),
+                          ),
+                        );
+                      }
+
+                      if (snapshot.connectionState ==
+                          ConnectionState.waiting) {
+                        return Container(
+                          height: 200.h,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius:
+                                BorderRadius.circular(16.r),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black
+                                    .withOpacity(0.03),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              valueColor:
+                                  AlwaysStoppedAnimation<
+                                    Color
+                                  >(
+                                    AppColors
+                                        .secondaryColor,
+                                  ),
+                            ),
+                          ),
+                        );
+                      }
+
+                      // Convert snapshot to list of NoteModel objects
+                      final notes =
+                          snapshot.data?.docs.map((doc) {
+                            final data = doc.data();
+                            // Add the document ID to the data if it's not already there
+                            if (!data.containsKey('id')) {
+                              data['id'] = doc.id;
+                            }
+                            return NoteModel.fromJson(data);
+                          }).toList() ??
+                          [];
+
+                      if (notes.isEmpty) {
                         return Container(
                           height: 200.h,
                           decoration: BoxDecoration(
@@ -932,9 +1008,9 @@ class _HomeScreenState extends State<HomeScreen>
                               crossAxisSpacing: 16.w,
                               mainAxisSpacing: 16.h,
                             ),
-                        itemCount: bloc.notes.length,
+                        itemCount: notes.length,
                         itemBuilder: (context, index) {
-                          final note = bloc.notes[index];
+                          final note = notes[index];
                           return SizedBox(
                             height: 200.h,
                             child: NoteCard(

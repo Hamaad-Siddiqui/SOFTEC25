@@ -350,23 +350,13 @@ class _MoodTrackingScreenState
 
       mainBloc.notifyAll();
 
-      // Close processing dialog and show success
+      // Close processing dialog and show affirmation dialog
       if (mounted) {
         Navigator.of(
           context,
         ).pop(); // Close processing dialog
-        _showSuccessDialog('Mood saved successfully!');
+        _showAffirmationDialog(affirmation);
       }
-
-      // Return to previous screen after delay
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted && Navigator.of(context).canPop()) {
-          Navigator.of(context).pop();
-        }
-        if (mounted && Navigator.of(context).canPop()) {
-          Navigator.of(context).pop();
-        }
-      });
     } catch (e) {
       // Handle error
       if (mounted && Navigator.of(context).canPop()) {
@@ -520,6 +510,79 @@ class _MoodTrackingScreenState
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'OK',
+                style: medium.copyWith(
+                  fontSize: 16.sp,
+                  color: AppColors.secondaryColor,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Show dialog with the user's affirmation
+  void _showAffirmationDialog(String affirmation) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.r),
+          ),
+          title: Text(
+            'Your Daily Affirmation',
+            textAlign: TextAlign.center,
+            style: semiBold.copyWith(
+              fontSize: 18.sp,
+              color: AppColors.darkTextColor,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: EdgeInsets.all(16.h),
+                decoration: BoxDecoration(
+                  color: AppColors.secondaryColor
+                      .withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: Text(
+                  '"$affirmation"',
+                  textAlign: TextAlign.center,
+                  style: medium.copyWith(
+                    fontSize: 16.sp,
+                    color: AppColors.darkTextColor,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ),
+              SizedBox(height: 20.h),
+              Text(
+                'Your mood has been saved successfully!',
+                textAlign: TextAlign.center,
+                style: regular.copyWith(
+                  fontSize: 14.sp,
+                  color: AppColors.grayTextColor,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                // Close dialog and then current screen
+                Navigator.of(context).pop(); // Close dialog
+                Navigator.of(
+                  context,
+                ).pop(); // Return to previous screen
+              },
               child: Text(
                 'OK',
                 style: medium.copyWith(
