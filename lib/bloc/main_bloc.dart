@@ -94,19 +94,19 @@ class MainBloc extends ChangeNotifier {
       ),
       NoteModel(
         id: '4',
-        title: 'Daily Tasks',
+        title: 'Meeting Notes',
         content:
-            '☐ House chores\n☐ 2 Km run\n☑ Read a book\n☑ Laundry',
+            'Meeting with the team to discuss project updates and next steps:\n\n• Review of last week\'s progress\n• Discussion of challenges faced\n• Planning for next week\'s tasks',
         lastModified: DateTime(
           now.year,
           now.month,
-          now.day - 8,
+          now.day - 10,
         ),
-        tags: ['Productivity', 'Daily'],
+        tags: ['Work', 'Meeting'],
         summary: [
-          'Daily task list with completed and pending items',
-          'Combination of household chores and personal activities',
-          'Exercise and reading tasks included',
+          'Team meeting to review project updates',
+          'Discussion of challenges faced in the past week',
+          'Planning for next week\'s tasks and goals',
         ],
       ),
     ];
@@ -400,7 +400,7 @@ Here is the prompt by the user $checklist.
         OpenAIChatCompletionChoiceMessageModel(
           content: [
             OpenAIChatCompletionChoiceMessageContentItemModel.text(
-              "You are a test generator.",
+              "You are an AI assistant.",
             ),
           ],
           role: OpenAIChatMessageRole.system,
@@ -462,7 +462,7 @@ Here is the prompt by the user $task.
         OpenAIChatCompletionChoiceMessageModel(
           content: [
             OpenAIChatCompletionChoiceMessageContentItemModel.text(
-              "You are a AI assistant.",
+              "You are an AI assistant.",
             ),
           ],
           role: OpenAIChatMessageRole.system,
@@ -517,7 +517,59 @@ Here is the users note: $note
         OpenAIChatCompletionChoiceMessageModel(
           content: [
             OpenAIChatCompletionChoiceMessageContentItemModel.text(
-              "You are a test generator.",
+              "You are an AI assistant.",
+            ),
+          ],
+          role: OpenAIChatMessageRole.system,
+        );
+
+    final userMessage = OpenAIChatCompletionChoiceMessageModel(
+      content: [
+        OpenAIChatCompletionChoiceMessageContentItemModel.text(
+          prompt,
+        ),
+      ],
+      role: OpenAIChatMessageRole.user,
+    );
+
+    final requestMessages = [systemMessage, userMessage];
+
+    OpenAIChatCompletionModel chatCompletion = await OpenAI
+        .instance
+        .chat
+        .create(
+          model: "gpt-4o-mini",
+          responseFormat: {"type": "json_object"},
+          messages: requestMessages,
+        );
+    notifyListeners();
+    return jsonDecode(
+      chatCompletion.choices[0].message.content![0].text!,
+    );
+  }
+
+  Future<Map<String, dynamic>> dailyAffirmation(
+    String mood,
+    String reflection,
+  ) async {
+    final String prompt = '''
+Please make sure that you return JSON only because whatever you give back goes directly to my codebase. So you will be given an input from the user that will be their mood for today. The mood can be angry, sad, neutral, happy, excited. These have the score from 1 to 5 respectively angry being the lowest i.e. 1 and excited being the highest i.e. 5. I want you to take that and the reflection the user will give you about their day and give them affirmation and a motivational message. Here is the basic JSON format which you will return:
+
+{
+	affirmation: "<return data here>"
+}
+
+Here is the users mood: $mood
+Here is the users reflection: $reflection
+
+
+''';
+
+    final systemMessage =
+        OpenAIChatCompletionChoiceMessageModel(
+          content: [
+            OpenAIChatCompletionChoiceMessageContentItemModel.text(
+              "You are an AI assistant.",
             ),
           ],
           role: OpenAIChatMessageRole.system,

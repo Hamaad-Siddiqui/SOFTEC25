@@ -792,18 +792,19 @@ class _HomeScreenState extends State<HomeScreen>
                   padding: EdgeInsets.symmetric(
                     horizontal: 16.w,
                   ),
-                  child: Text(
-                    'Your Notes',
-                    style: semiBold.copyWith(
-                      fontSize: 18.sp,
-                      color: AppColors.secondaryColor,
-                    ),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Your Notes',
+                        style: semiBold.copyWith(
+                          fontSize: 18.sp,
+                          color: AppColors.secondaryColor,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
 
-                SizedBox(height: 16.h),
-
-                // Notes grid
                 Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: 16.w,
@@ -811,19 +812,43 @@ class _HomeScreenState extends State<HomeScreen>
                   child: Consumer<MainBloc>(
                     builder: (context, bloc, _) {
                       if (bloc.notes.isEmpty) {
-                        return Center(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(
-                              vertical: 40.h,
-                            ),
+                        return Container(
+                          height: 200.h,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius:
+                                BorderRadius.circular(16.r),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black
+                                    .withOpacity(0.03),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Center(
                             child: Column(
+                              mainAxisAlignment:
+                                  MainAxisAlignment.center,
                               children: [
-                                Icon(
-                                  Icons.note_alt_outlined,
-                                  size: 48.sp,
-                                  color: AppColors
-                                      .grayTextColor
-                                      .withOpacity(0.5),
+                                Container(
+                                  padding: EdgeInsets.all(
+                                    16.w,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Color(
+                                      0xFFF0F4F8,
+                                    ),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.note_alt_outlined,
+                                    size: 32.sp,
+                                    color: AppColors
+                                        .secondaryColor
+                                        .withOpacity(0.7),
+                                  ),
                                 ),
                                 SizedBox(height: 16.h),
                                 Text(
@@ -832,20 +857,26 @@ class _HomeScreenState extends State<HomeScreen>
                                     fontSize: 16.sp,
                                     color:
                                         AppColors
-                                            .grayTextColor,
+                                            .darkTextColor,
                                   ),
                                 ),
                                 SizedBox(height: 8.h),
-                                Text(
-                                  'Tap the + button to create your first note',
-                                  style: regular.copyWith(
-                                    fontSize: 14.sp,
-                                    color: AppColors
-                                        .grayTextColor
-                                        .withOpacity(0.7),
+                                Padding(
+                                  padding:
+                                      EdgeInsets.symmetric(
+                                        horizontal: 32.w,
+                                      ),
+                                  child: Text(
+                                    'Tap the + button and select "Note" to create your first note',
+                                    style: regular.copyWith(
+                                      fontSize: 14.sp,
+                                      color:
+                                          AppColors
+                                              .grayTextColor,
+                                    ),
+                                    textAlign:
+                                        TextAlign.center,
                                   ),
-                                  textAlign:
-                                      TextAlign.center,
                                 ),
                               ],
                             ),
@@ -860,9 +891,9 @@ class _HomeScreenState extends State<HomeScreen>
                         gridDelegate:
                             SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 2,
-                              childAspectRatio: 0.8,
-                              crossAxisSpacing: 12.w,
-                              mainAxisSpacing: 12.h,
+                              childAspectRatio: 0.75,
+                              crossAxisSpacing: 16.w,
+                              mainAxisSpacing: 16.h,
                             ),
                         itemCount: bloc.notes.length,
                         itemBuilder: (context, index) {
@@ -1499,6 +1530,7 @@ class _ProgressCardState extends State<ProgressCard> {
                             borderRadius:
                                 BorderRadius.circular(24.r),
                           ),
+
                           child: Center(
                             child: Text(
                               'Daily',
