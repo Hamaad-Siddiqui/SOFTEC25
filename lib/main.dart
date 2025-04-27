@@ -15,6 +15,7 @@ import 'package:softec25/screens/auth/register.dart';
 import 'package:softec25/screens/home/ai.dart';
 import 'package:softec25/screens/home/dashboard.dart';
 import 'package:softec25/screens/home/home.dart';
+import 'package:softec25/screens/home/mood_tracking.dart';
 import 'package:softec25/screens/home/settings.dart';
 
 late Box box;
@@ -94,6 +95,8 @@ class _MyAppState extends State<MyApp> {
                 (context) => const SettingScreen(),
             AIScreen.routeName:
                 (context) => const AIScreen(),
+            MoodTrackingScreen.routeName:
+                (context) => const MoodTrackingScreen(),
           },
           initialRoute: Login.routeName,
         ),

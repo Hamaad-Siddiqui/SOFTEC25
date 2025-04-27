@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:softec25/screens/home/ai.dart';
 import 'package:softec25/screens/home/home.dart';
+import 'package:softec25/screens/home/mood_tracking.dart';
 import 'package:softec25/screens/home/settings.dart';
 import 'package:softec25/screens/operations/notes.dart';
 import 'package:softec25/styles.dart';
@@ -266,14 +267,15 @@ class _DashboardState extends State<Dashboard>
                               label: 'Reminder',
                               iconPath:
                                   'assets/svg/notification.svg',
-                              // bgColor: const Color(
-                              //   0xFF47464A,
-                              // ),
                               bgColor:
                                   AppColors.secondaryColor,
                               onTap: () {
                                 _toggleOverlay();
-                                // Add action for Reminder
+                                Navigator.pushNamed(
+                                  context,
+                                  MoodTrackingScreen
+                                      .routeName,
+                                );
                               },
                             ),
                           ),
