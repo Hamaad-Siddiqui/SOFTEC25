@@ -253,7 +253,13 @@ class _DashboardState extends State<Dashboard>
 
                               onTap: () {
                                 _toggleOverlay();
-                                // Add action for Checklist
+                                Navigator.pushNamed(
+                                  context,
+                                  AIScreen.routeName,
+                                  arguments: {
+                                    'type': 'checklist',
+                                  },
+                                );
                               },
                             ),
                           ),
@@ -297,6 +303,9 @@ class _DashboardState extends State<Dashboard>
                                 Navigator.pushNamed(
                                   context,
                                   AIScreen.routeName,
+                                  arguments: {
+                                    'type': 'task',
+                                  },
                                 );
                               },
                             ),

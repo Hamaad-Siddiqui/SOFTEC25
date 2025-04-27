@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:softec25/bloc/main_bloc.dart';
 import 'package:softec25/models/task_model.dart';
 import 'package:softec25/styles.dart';
+import 'package:softec25/utils/utils.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:video_player/video_player.dart';
@@ -33,6 +34,10 @@ class _AIScreenState extends State<AIScreen> {
   bool _isProcessing =
       false; // Flag to track if we're currently processing a task
 
+  // Type flags to determine if we're creating a task or checklist
+  bool _isTask = true; // Default to task
+  bool _isChecklist = false;
+
   @override
   void initState() {
     super.initState();
@@ -49,6 +54,20 @@ class _AIScreenState extends State<AIScreen> {
 
     // Initialize speech recognition
     _initSpeech();
+
+    // Check route arguments after the first frame is rendered
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Check if we have arguments to determine if we're creating a task or checklist
+      final args =
+          ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
+      if (args != null) {
+        setState(() {
+          _isTask = args['type'] == 'task';
+          _isChecklist = args['type'] == 'checklist';
+        });
+      }
+    });
   }
 
   /// Initialize speech recognition functionality
@@ -149,10 +168,14 @@ class _AIScreenState extends State<AIScreen> {
     try {
       // Show processing dialog that will be updated with success message
       _showProcessingDialog();
+      console('IS CHECKLIST: $_isChecklist');
 
-      // Call the AI service for task creation
+      // Call the AI service for task or checklist creation based on type
       final mainBloc = context.read<MainBloc>();
-      final response = await mainBloc.taskCreation(input);
+      final response =
+          _isChecklist
+              ? await mainBloc.checklistCreation(input)
+              : await mainBloc.taskCreation(input);
 
       // Create a new task from the AI response
       final String taskId =
@@ -192,7 +215,9 @@ class _AIScreenState extends State<AIScreen> {
           ).pop(); // Return to the previous screen
 
           if (mounted && Navigator.of(context).canPop()) {
-            Navigator.of(context).pop();
+            Navigator.of(
+              context,
+            ).pop(); // Return to the previous screen
           }
         }
       });
@@ -239,7 +264,7 @@ class _AIScreenState extends State<AIScreen> {
               ),
               SizedBox(height: 20.h),
               Text(
-                'Creating your task...',
+                'Creating your ${_isChecklist ? 'checklist' : 'task'}...',
                 style: medium.copyWith(
                   fontSize: 16.sp,
                   color: AppColors.darkTextColor,
@@ -282,7 +307,9 @@ class _AIScreenState extends State<AIScreen> {
               ),
               SizedBox(height: 20.h),
               Text(
-                'Task Created',
+                _isChecklist
+                    ? 'Checklist Created'
+                    : 'Task Created',
                 style: semiBold.copyWith(
                   fontSize: 18.sp,
                   color: AppColors.darkTextColor,

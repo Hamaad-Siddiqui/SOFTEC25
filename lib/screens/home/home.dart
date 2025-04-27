@@ -4,10 +4,12 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:softec25/bloc/main_bloc.dart';
+import 'package:softec25/models/mood_model.dart';
 import 'package:softec25/models/notes_model.dart';
 import 'package:softec25/models/task_model.dart';
 import 'package:softec25/screens/operations/notes.dart';
 import 'package:softec25/styles.dart';
+import 'package:softec25/utils/utils.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -30,6 +32,9 @@ class _HomeScreenState extends State<HomeScreen>
   late List<TaskModel> allTasks;
   // Filtered tasks for the selected date
   late List<TaskModel> filteredTasks;
+
+  // Loading state for today's mood
+  bool _isMoodLoading = true;
 
   @override
   void initState() {
@@ -58,12 +63,18 @@ class _HomeScreenState extends State<HomeScreen>
     // Filter tasks for the selected date (initially today)
     _filterTasksByDate();
 
-    // Initialize notes
+    // Initialize notes and fetch today's mood
     final bloc = Provider.of<MainBloc>(
       context,
       listen: false,
     );
     bloc.fetchNotes();
+
+    // Fetch today's mood
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchTodayMood();
+    });
   }
 
   // Initialize tasks for different days
@@ -479,6 +490,44 @@ class _HomeScreenState extends State<HomeScreen>
     }
   }
 
+  // Fetch today's mood
+  Future<void> _fetchTodayMood() async {
+    setState(() {
+      _isMoodLoading = true;
+    });
+    showLoadingIndicator(context);
+
+    final bloc = Provider.of<MainBloc>(
+      context,
+      listen: false,
+    );
+    await bloc.fetchTodayMood();
+
+    hideLoadingIndicator();
+
+    setState(() {
+      _isMoodLoading = false;
+    });
+  }
+
+  // Helper method to get the SVG name from MoodType
+  String _getMoodSvgName(MoodType mood) {
+    switch (mood) {
+      case MoodType.angry:
+        return 'angry.svg';
+      case MoodType.sad:
+        return 'sad.svg';
+      case MoodType.neutral:
+        return 'neutral.svg';
+      case MoodType.happy:
+        return 'happy.svg';
+      case MoodType.excited:
+        return 'excited.svg';
+      default:
+        return 'neutral.svg';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final bloc = Provider.of<MainBloc>(context);
@@ -539,6 +588,7 @@ class _HomeScreenState extends State<HomeScreen>
                         ],
                       ),
                       const Spacer(),
+
                       Container(
                         width: 32.h,
                         height: 32.h,
