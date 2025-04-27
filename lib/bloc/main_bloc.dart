@@ -9,6 +9,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive/hive.dart';
 import 'package:softec25/models/mood_model.dart';
 import 'package:softec25/models/notes_model.dart';
+import 'package:softec25/models/task_model.dart';
 import 'package:softec25/models/user_model.dart';
 import 'package:softec25/utils/utils.dart';
 
@@ -365,7 +366,7 @@ Please make sure that you return JSON because whatever you give back goes direct
 {
   "title": "Apply for internship",
   "time" : "", 
-  "timestamp": "1714123456123",
+  "timestamp": "YYYY-MM-DDTHH:MM:SS+05:00",
   "timeString": "",
   "category": "Career",
   "description": "",
@@ -392,7 +393,12 @@ Please make sure that you return JSON because whatever you give back goes direct
 	], 
 }
 
-The timestamp is the milliseconds from flutter firestore like this. Timestamp timestamp = Timestamp.now(); int millis = timestamp.millisecondsSinceEpoch; In this example the task is assumed for today because now deadline was given in he prompt by the user. If a future date is given then give the timestamp for that. If a task is big it can be broken down and you can generate its description too and a title. I will also give a set of categories if the task fits one of those categories then pick one from there. If not then generate a category for the task and return it. A task can have a single category. You have to break the task into subtasks as well. By default they wont be completed. If they said something like apply for internships tonight you would've assumed today at 8pm. if 8pm hasn't already happened. so pls use common sense there. something like: time: "20:00", timeString: "8 PM", timed: true, and the timestamp for 8pm today. You dont have to essentially give 4 subtasks. just give as many as you think are needed. if the user says something like I want to do X on 21st which is an example date then dont set timed to true, But add the timestamp for the start of that day, also empty time and timeString. If the user gives a vague task like "party tmrw" then make sure that you would clean up the title so it would be "Have a party" and it would be set for tomorrow accordingly. 
+The timestamp is an ISO8601 string
+In this example the task is assumed for today because now deadline was given in he prompt by the user. If a future date is given then give the timestamp for that. If a task is big it can be broken down and you can generate its description too and a title. I will also give a set of categories if the task fits one of those categories then pick one from there. If not then generate a category for the task and return it. A task can have a single category. You have to break the task into subtasks as well. By default they wont be completed. If they said something like apply for internships tonight you would've assumed today at 8pm. if 8pm hasn't already happened. so pls use common sense there. something like: time: "20:00", timeString: "8 PM", timed: true, and the timestamp for 8pm today. You dont have to essentially give 4 subtasks. just give as many as you think are needed. if the user says something like I want to do X on 21st which is an example date then dont set timed to true, But add the timestamp for the start of that day, also empty time and timeString. If the user gives a vague task like "party tmrw" then make sure that you would clean up the title so it would be "Have a party" and it would be set for tomorrow accordingly. 
+the year is ${DateTime.now().year} and the month is ${DateTime.now().month} and the day is ${DateTime.now().day}
+the time is ${DateTime.now().hour}:${DateTime.now().minute}.
+generate the timestamp accordingly
+it is important for dueDate to be correct as the whole app works on that.
 
 
 Here are the existing categories: $createdCategories
@@ -444,7 +450,7 @@ Please make sure that you return JSON because whatever you give back goes direct
 {
   "title": "Apply for internship",
   "time" : "", 
-  "timestamp": "1714123456123",
+  "timestamp": "YYYY-MM-DDTHH:MM:SS+05:00",
   "timeString": "",
   "category": "Career",
   "description": "",
@@ -454,7 +460,13 @@ Please make sure that you return JSON because whatever you give back goes direct
 }
 
 
-The timestamp is the milliseconds from flutter firestore like this. Timestamp timestamp = Timestamp.now(); int millis = timestamp.millisecondsSinceEpoch; In this example the task is assumed for today because now deadline was given in he prompt by the user. If a future date is given then give the timestamp for that. If a task is big it can be broken down and you can generate its description too and a title. I will also give a set of categories if the task fits one of those categories then pick one from there. If not then generate a category for the task and return it. A task can have a single category. completed is always false and subtasks is always empty u dont need to gen those.  If they said something like apply for internships tonight you would've assumed today at 8pm. if 8pm hasn't already happened. so pls use common sense there. something like: time: "20:00", timeString: "8 PM", timed: true, and the timestamp for 8pm today. You dont have to essentially give 4 subtasks. just give as many as you think are needed. if the user says something like I want to do X on 21st which is an example date then dont set timed to true, But add the timestamp for the start of that day, also empty time and timeString. If the user gives a vague task like "party tmrw" then make sure that you would clean up the title so it would be "Have a party" and it would be set for tomorrow accordingly.
+
+The timestamp is an ISO8601 string
+In this example the task is assumed for today because now deadline was given in he prompt by the user. If a future date is given then give the timestamp for that. If a task is big it can be broken down and you can generate its description too and a title. I will also give a set of categories if the task fits one of those categories then pick one from there. If not then generate a category for the task and return it. A task can have a single category. completed is always false and subtasks is always empty u dont need to gen those.  If they said something like apply for internships tonight you would've assumed today at 8pm. if 8pm hasn't already happened. so pls use common sense there. something like: time: "20:00", timeString: "8 PM", timed: true, and the timestamp for 8pm today. You dont have to essentially give 4 subtasks. just give as many as you think are needed. if the user says something like I want to do X on 21st which is an example date then dont set timed to true, But add the timestamp for the start of that day, also empty time and timeString. If the user gives a vague task like "party tmrw" then make sure that you would clean up the title so it would be "Have a party" and it would be set for tomorrow accordingly.
+the year is ${DateTime.now().year} and the month is ${DateTime.now().month} and the day is ${DateTime.now().day}
+the time is ${DateTime.now().hour}:${DateTime.now().minute}.
+generate the timestamp accordingly
+it is important for dueDate to be correct as the whole app works on that.
 
 
 Here are the existing categories: $createdCategories
@@ -506,13 +518,17 @@ Please make sure that you return JSON because whatever you give back goes direct
 {
   "title": "Feed the dogs",
   "time" : "19:00", 
-  "timestamp": "1714123456123",
+  "timestamp": "YYYY-MM-DDTHH:MM:SS+05:00",
   "timeString": "7 PM",
   "description": "",
 }
 
-
-The timestamp is the milliseconds from flutter firestore like this. Timestamp timestamp = Timestamp.now(); int millis = timestamp.millisecondsSinceEpoch; In this example the task is assumed for today because now deadline was given in he prompt by the user. If a future date is given then give the timestamp for that. If a task is big it can be broken down and you can generate its description too and a title. If they said something like apply for internships tonight you would've assumed today at 8pm. if 8pm hasn't already happened. so pls use common sense their. something like: time: "20:00", timeString: "8 PM", and the timestamp for 8pm today. Also the user can also say "egg boil in 10 mins". so remember its your job to structure this even though the task is vague you can make the title something like "Check boiled eggs" and have that reminder set for 10 minutes from right now. 
+The timestamp is an ISO8601 string
+In this example the task is assumed for today because now deadline was given in he prompt by the user. If a future date is given then give the timestamp for that. If a task is big it can be broken down and you can generate its description too and a title. If they said something like apply for internships tonight you would've assumed today at 8pm. if 8pm hasn't already happened. so pls use common sense their. something like: time: "20:00", timeString: "8 PM", and the timestamp for 8pm today. Also the user can also say "egg boil in 10 mins". so remember its your job to structure this even though the task is vague you can make the title something like "Check boiled eggs" and have that reminder set for 10 minutes from right now. 
+the year is ${DateTime.now().year} and the month is ${DateTime.now().month} and the day is ${DateTime.now().day}
+the time is ${DateTime.now().hour}:${DateTime.now().minute}.
+generate the timestamp accordingly
+it is important for dueDate to be correct as the whole app works on that.
 
 Here is the prompt by the user $reminder
 ''';
@@ -722,5 +738,106 @@ Here is the users reflection: $reflection
 
   Future<void> notifyAll() async {
     notifyListeners();
+  }
+
+  // Get a stream of tasks sorted by due date
+  Stream<List<TaskModel>> getTasksStream() {
+    if (!isLoggedIn) return Stream.value([]);
+
+    return db
+        .collection('users')
+        .doc(auth.currentUser!.uid)
+        .collection('tasks')
+        .orderBy('dueDate', descending: false)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs.map((doc) {
+            // doc.data()['id'] = doc.id;
+            var data = doc.data();
+            data['id'] = doc.id;
+            return TaskModel.fromMap(data);
+          }).toList();
+        });
+  }
+
+  // Mark a task as completed or incomplete
+  Future<void> toggleTaskCompletion(TaskModel task) async {
+    if (!isLoggedIn) return;
+
+    try {
+      await db
+          .collection('users')
+          .doc(auth.currentUser!.uid)
+          .collection('tasks')
+          .doc(task.id)
+          .update({'isCompleted': !task.isCompleted});
+    } catch (e) {
+      console('Error toggling task completion: $e');
+    }
+  }
+
+  // Mark a subtask as completed or incomplete
+  Future<void> toggleSubtaskCompletion(
+    TaskModel task,
+    int subtaskIndex,
+  ) async {
+    if (!isLoggedIn) return;
+
+    try {
+      // Create a new list of subtasks with the toggled value
+      List<Map<String, dynamic>> updatedSubtasks =
+          task.subtasks.asMap().entries.map((entry) {
+            int idx = entry.key;
+            SubTaskModel subtask = entry.value;
+
+            if (idx == subtaskIndex) {
+              return SubTaskModel(
+                task: subtask.task,
+                isCompleted: !subtask.isCompleted,
+              ).toMap();
+            }
+            return subtask.toMap();
+          }).toList();
+
+      // Update the subtasks in Firestore
+      await db
+          .collection('users')
+          .doc(auth.currentUser!.uid)
+          .collection('tasks')
+          .doc(task.id)
+          .update({'subtasks': updatedSubtasks});
+    } catch (e) {
+      console('Error toggling subtask completion: $e');
+    }
+  }
+
+  // Check if all subtasks are completed
+  bool areAllSubtasksCompleted(TaskModel task) {
+    if (task.subtasks.isEmpty) return false;
+    return task.subtasks.every(
+      (subtask) => subtask.isCompleted,
+    );
+  }
+
+  // Update an entire task
+  Future<void> updateTask(TaskModel task) async {
+    if (!isLoggedIn) return;
+
+    // Validate task has a non-empty ID before attempting to update
+    if (task.id.isEmpty) {
+      console('Error updating task: Task ID is empty');
+      return;
+    }
+
+    try {
+      await db
+          .collection('users')
+          .doc(auth.currentUser!.uid)
+          .collection('tasks')
+          .doc(task.id)
+          .update(task.toMap());
+    } catch (e) {
+      console('Error updating task: $e');
+    }
   }
 }

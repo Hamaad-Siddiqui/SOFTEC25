@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:softec25/bloc/main_bloc.dart';
 import 'package:softec25/models/mood_model.dart';
 import 'package:softec25/styles.dart';
+import 'package:softec25/utils/utils.dart';
 
 class MoodTrackingScreen extends StatefulWidget {
   const MoodTrackingScreen({super.key});
@@ -388,32 +389,16 @@ class _MoodTrackingScreenState
     String userId,
     MoodType moodType,
   ) async {
-    // This would typically fetch mood history and call an AI service
-    // For now, we'll return a placeholder affirmation based on the mood
-
     try {
-      // In a real implementation, you would:
-      // 1. Fetch recent mood history from Firestore
-      // 2. Call an AI service using mainBloc to generate a personalized affirmation
-      // 3. Return the generated affirmation
+      final mb = context.read<MainBloc>();
+      final res = await mb.dailyAffirmation(
+        moodType.name,
+        _notesController.text.trim(),
+      );
 
-      // Example placeholder affirmations based on mood
-      switch (moodType) {
-        case MoodType.angry:
-          return "It's okay to feel angry. Take deep breaths and remember tomorrow is a new day.";
-        case MoodType.sad:
-          return "Your feelings are valid. Be gentle with yourself today.";
-        case MoodType.neutral:
-          return "You're doing great. Every day is a chance to grow.";
-        case MoodType.happy:
-          return "Your positive energy is contagious. Keep spreading joy!";
-        case MoodType.excited:
-          return "Channel this excitement into something meaningful. You're unstoppable!";
-        default:
-          return "Every feeling is temporary. Tomorrow brings new opportunities.";
-      }
+      return res['affirmation'] ?? "You are doing great!";
     } catch (e) {
-      print('Error generating affirmation: $e');
+      warn('Error generating affirmation: $e');
       return "Take a moment to breathe and be present."; // Fallback affirmation
     }
   }

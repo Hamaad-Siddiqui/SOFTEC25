@@ -73,10 +73,7 @@ class TaskModel {
     };
   }
 
-  static TaskModel fromMap(
-    Map<String, dynamic> map,
-    String id,
-  ) {
+  static TaskModel fromMap(Map<String, dynamic> map) {
     final rawSubtasks = map['subtasks'];
     List<SubTaskModel> subtasks = [];
 
@@ -96,7 +93,7 @@ class TaskModel {
     }
 
     return TaskModel(
-      id: id,
+      id: map['id'] ?? '',
       title: map['title'] ?? '',
       description: map['description'] ?? '',
       dueDate: (map['dueDate'] as Timestamp).toDate(),
@@ -147,12 +144,12 @@ class TaskModel {
     // Parse timestamp from string
     DateTime dueDate;
     try {
-      int timestamp = int.parse(response['timestamp']);
-      dueDate = DateTime.fromMillisecondsSinceEpoch(
-        timestamp,
-      );
+      String iso8601 = response['timestamp'].toString();
+      dueDate = DateTime.parse(iso8601);
     } catch (e) {
-      dueDate = DateTime.now(); // Fallback to current time
+      throw Exception(
+        'Invalid timestamp format: ${response['timestamp']}',
+      );
     }
 
     // Create subtasks from the response if they exist
